@@ -1,0 +1,1737 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Pacotes na Rede · Jogo</title>
+<style>
+  :root{
+    --fundo:#0f0c14; --painel:#1d1727; --painel-2:#261e33; --linha:#352b45;
+    --texto:#f4eff8; --suave:#b3a8c4; --roxo:#a78bfa; --roxo-forte:#7c5ce0;
+    --coral:#f4937a; --menta:#86dcb9; --ambar:#f5c76b;
+    --serif:Georgia,"Iowan Old Style",serif;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{background:radial-gradient(900px 500px at 80% -10%,rgba(124,92,224,.18),transparent 60%),var(--fundo);
+    color:var(--texto);font-family:var(--sans);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.6rem;padding:.7rem;
+    user-select:none;-webkit-user-select:none;touch-action:manipulation;overflow:hidden}
+  .ic{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;flex:0 0 auto}
+
+  .cabeca{width:min(100%,960px);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.4rem}
+  .cabeca h1{font-family:var(--serif);font-weight:normal;font-size:1.2rem}
+  .hud{display:flex;gap:.8rem;font-size:.88rem;color:var(--suave);flex-wrap:wrap;align-items:center}
+  .hud span{display:inline-flex;gap:.3rem;align-items:center}
+  .hud .ic{color:var(--roxo)}
+  .hud b{color:var(--texto);font-variant-numeric:tabular-nums;font-weight:700}
+  .coracoes .ic{color:var(--coral)}
+  .moeda-ic{color:var(--ambar)}
+  .dif{font-size:.72rem;padding:.15rem .5rem;border-radius:999px;border:1px solid currentColor}
+
+  .area{width:min(100%,960px,max(320px,calc((100vh - 200px) * 1.7778)));display:flex;flex-direction:column;gap:10px}
+  .tela{position:relative;width:100%;aspect-ratio:16/9;border-radius:16px;overflow:hidden;border:1px solid var(--linha);background:#140f1f;box-shadow:0 30px 60px -30px rgba(0,0,0,.8)}
+  canvas{width:100%;height:100%;display:block}
+
+  .controles{display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .grupo{display:flex;gap:8px}
+  .tbtn{width:64px;height:64px;border-radius:16px;background:var(--painel);border:1px solid var(--linha);border-bottom:4px solid #120e1b;color:var(--texto);
+    display:grid;place-items:center;cursor:pointer;transition:transform .08s,background .15s,border-color .15s;touch-action:none}
+  .tbtn svg{width:30px;height:30px;fill:none;stroke:currentColor;stroke-width:2.8;stroke-linecap:round;stroke-linejoin:round}
+  .tbtn.ativo{background:var(--roxo-forte);border-color:var(--roxo);transform:translateY(2px);border-bottom-width:2px}
+  .tbtn.pulo{width:80px;height:64px;border-color:rgba(244,147,122,.5)}
+  .tbtn.pulo.ativo{background:var(--coral);border-color:var(--coral)}
+  .tbtn.falar{border-color:rgba(134,220,185,.5)}
+  .tbtn.falar.ativo{background:var(--menta);color:#0d2a1f;border-color:var(--menta)}
+  .teclas-dica{font-size:.76rem;color:var(--suave);text-align:center;line-height:1.4}
+
+  /* painel de missões (canto superior esquerdo) */
+  .missoes{position:absolute;top:10px;left:10px;width:min(250px,48%);background:rgba(29,23,39,.85);border:1px solid var(--linha);border-radius:12px;padding:.55rem .7rem;z-index:3;pointer-events:none}
+  .missoes h3{font-size:.66rem;text-transform:uppercase;letter-spacing:.12em;color:var(--ambar);margin-bottom:.3rem}
+  .missoes ul{list-style:none;display:grid;gap:.25rem}
+  .missoes li{font-size:.78rem;color:var(--suave);display:flex;gap:.4rem;align-items:center}
+  .missoes li .bolinha{width:12px;height:12px;border-radius:50%;border:1px solid var(--suave);flex:0 0 12px}
+  .missoes li.ok{color:var(--menta)}
+  .missoes li.ok .bolinha{background:var(--menta);border-color:var(--menta)}
+
+  /* cartas de informação (não pausam o jogo) */
+  .carta-info{position:absolute;top:10px;right:10px;width:min(290px,58%);background:rgba(29,23,39,.92);border:1px solid var(--roxo);border-radius:12px;
+    padding:.6rem .8rem;transform:translateX(120%);transition:transform .4s cubic-bezier(.2,.8,.2,1);pointer-events:none;z-index:4}
+  .carta-info.mostrar{transform:translateX(0)}
+  .carta-info .cab-c{display:flex;align-items:center;gap:.4rem;font-size:.66rem;text-transform:uppercase;letter-spacing:.12em;color:var(--menta);font-weight:700;margin-bottom:.2rem}
+  .carta-info p{font-size:.84rem;line-height:1.45;color:#e9e2f3}
+
+  /* diálogo com personagens (não bloqueia) */
+  .dialogo{position:absolute;left:50%;bottom:10px;transform:translate(-50%,160%);width:min(560px,86%);background:rgba(29,23,39,.94);border:1px solid var(--menta);border-radius:14px;
+    padding:.6rem .9rem;transition:transform .35s cubic-bezier(.2,.8,.2,1);z-index:4;pointer-events:none}
+  .dialogo.mostrar{transform:translate(-50%,0)}
+  .dialogo .nome{font-size:.7rem;text-transform:uppercase;letter-spacing:.12em;color:var(--menta);font-weight:700;margin-bottom:.15rem}
+  .dialogo p{font-size:.9rem;line-height:1.45;color:#f0ebf7}
+
+  /* sobreposições */
+  .sobre{position:absolute;inset:0;background:rgba(15,12,20,.9);display:flex;overflow-y:auto;transition:opacity .3s;z-index:5;padding:1rem}
+  .sobre.oculto{opacity:0;pointer-events:none}
+  .sobre-in{margin:auto;max-width:640px;width:100%;text-align:center;display:flex;flex-direction:column;align-items:center;gap:.8rem}
+  .sobre h2{font-family:var(--serif);font-weight:normal;font-size:clamp(1.4rem,4vw,2.1rem)}
+  .sobre-in > p{color:var(--suave);max-width:520px;font-size:.94rem}
+  .rotulo{font-size:.7rem;text-transform:uppercase;letter-spacing:.14em;color:var(--coral);font-weight:700}
+  .btn{display:inline-flex;align-items:center;gap:.5rem;background:var(--roxo-forte);color:#fff;border:none;border-radius:12px;padding:.7rem 1.3rem;font:inherit;font-weight:600;cursor:pointer;transition:background .2s,transform .15s}
+  .btn:hover{background:#6a4dd1}
+  .btn:active{transform:scale(.97)}
+  .btn.sec{background:transparent;border:1px solid var(--linha);color:var(--texto)}
+  .grade-stats{display:grid;grid-template-columns:repeat(6,1fr);gap:.5rem;width:100%}
+  @media(max-width:640px){.grade-stats{grid-template-columns:repeat(3,1fr)}}
+  .stat{background:var(--painel);border:1px solid var(--linha);border-radius:12px;padding:.55rem .25rem}
+  .stat b{display:block;font-family:var(--serif);font-size:1.3rem;font-weight:normal}
+  .stat small{font-size:.7rem;color:var(--suave)}
+  .conq{list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:.5rem;width:100%;text-align:left}
+  @media(max-width:600px){.conq{grid-template-columns:1fr}}
+  .conq li{display:flex;gap:.6rem;align-items:center;background:var(--painel);border:1px solid var(--linha);border-radius:12px;padding:.55rem .7rem;opacity:.42;transition:opacity .4s,border-color .4s}
+  .conq li.ok{opacity:1;border-color:var(--menta)}
+  .conq .ic-c{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:var(--painel-2);color:var(--suave);flex:0 0 34px}
+  .conq li.ok .ic-c{background:rgba(134,220,185,.14);color:var(--menta)}
+  .conq b{display:block;font-size:.88rem}
+  .conq small{color:var(--suave);font-size:.76rem}
+
+  /* enigma do boss */
+  .cifra{font-family:var(--serif);font-size:clamp(1.2rem,3.4vw,1.8rem);letter-spacing:.12em;color:var(--ambar);background:var(--fundo-2,#17121e);border:1px dashed var(--ambar);border-radius:12px;padding:.7rem 1rem;word-break:break-word}
+  .entrada{display:flex;gap:.5rem;width:100%;max-width:460px}
+  .entrada input{flex:1;background:#17121e;border:1px solid var(--linha);border-radius:12px;padding:.65rem .9rem;color:var(--texto);font:inherit;text-transform:uppercase;outline:none}
+  .entrada input:focus{border-color:var(--roxo)}
+  .resposta{min-height:1.4em;font-size:.9rem;color:var(--suave)}
+  .resposta.erro{color:var(--coral);animation:treme .35s}
+  .resposta.certo{color:var(--menta)}
+  @keyframes treme{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+  /* faixa preta com missões e mensagens (fica fora da imagem do jogo) */
+  .faixa{display:grid;grid-template-columns:minmax(150px,.8fr) 1.4fr;gap:8px;background:#0a0710;border:1px solid var(--linha);border-radius:12px;padding:8px}
+  @media(max-width:560px){.faixa{grid-template-columns:1fr}}
+  .faixa .missoes{position:static;width:auto;background:transparent;border:none;padding:0;pointer-events:auto}
+  .faixa .missoes li{font-size:.78rem}
+  .mensagens{display:grid;gap:8px;align-content:start;min-width:0}
+  .carta-info,.dialogo{position:static;width:auto;transform:none;transition:opacity .35s;opacity:.45;pointer-events:auto;background:var(--painel);border:1px solid var(--linha);border-radius:10px;padding:.5rem .7rem;min-height:44px}
+  .carta-info.mostrar,.dialogo.mostrar{opacity:1;transform:none}
+  .carta-info.mostrar{border-color:var(--roxo)}
+  .dialogo.mostrar{border-color:var(--menta)}
+  .carta-info p,.dialogo p{font-size:.82rem;line-height:1.35}
+
+  .dialogo[hidden],.tbtn[hidden]{display:none !important}
+  .dialogo .acao{display:block;margin-top:.3rem;font-size:.7rem;color:var(--suave)}
+  .som{background:var(--painel);border:1px solid var(--linha);border-radius:10px;color:var(--texto);padding:.3rem .7rem;font:inherit;font-size:.8rem;cursor:pointer}
+  .resumo-final{width:100%;max-width:560px;text-align:left;background:var(--painel);border:1px solid var(--linha);border-radius:12px;padding:.9rem 1rem;font-size:.82rem;color:var(--suave)}
+  .resumo-final ul{padding-left:1.1rem;display:grid;gap:.3rem;margin:.3rem 0 .7rem}
+  .resumo-final li{color:var(--texto)}
+  .resumo-final .fontes li{color:var(--suave)}
+  /* telas de fim de jogo e enigma cobrem toda a página, inclusive faixa e controles */
+  #fim, #vitoria, #enigma{position:fixed;inset:0;z-index:50;background:rgba(15,12,20,.97);padding:1.2rem}
+  #fim .fim-in, #vitoria .fim-in{margin:auto;max-width:640px;width:100%;text-align:center;display:flex;flex-direction:column;align-items:center;gap:.9rem;padding:.5rem 0;animation:subirFim .6s both}
+  @keyframes subirFim{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+  #fim h2, #vitoria h2{font-family:var(--serif);font-weight:normal;font-size:clamp(1.8rem,5vw,2.6rem)}
+  .fim-txt{color:var(--suave);max-width:480px;font-size:.95rem}
+  #fim .grade-stats, #vitoria .grade-stats{grid-template-columns:repeat(4,1fr)}
+  #fim .stat, #vitoria .stat{animation:subirFim .5s both}
+  #fim .stat:nth-child(2), #vitoria .stat:nth-child(2){animation-delay:.08s}
+  #fim .stat:nth-child(3), #vitoria .stat:nth-child(3){animation-delay:.16s}
+  #fim .stat:nth-child(4), #vitoria .stat:nth-child(4){animation-delay:.24s}
+  #fim .stat b, #vitoria .stat b{font-size:1.6rem;color:var(--texto)}
+  .sub{font-size:.72rem;text-transform:uppercase;letter-spacing:.14em;color:var(--ambar);font-weight:700;margin-top:.2rem}
+  .conq-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.5rem;width:100%}
+  .conq-item{background:var(--painel);border:1px solid var(--linha);border-radius:12px;padding:.6rem .5rem;display:grid;gap:.2rem;justify-items:center;opacity:.38;filter:grayscale(1);transition:opacity .4s,filter .4s}
+  .conq-item.ok{opacity:1;filter:none;border-color:var(--menta);box-shadow:0 0 18px -6px var(--menta)}
+  .conq-item b{font-size:.8rem}
+  .conq-item small{font-size:.68rem;color:var(--suave);line-height:1.2}
+  .conq-ic{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:var(--painel-2);color:var(--suave);margin-bottom:.2rem}
+  .conq-item.ok .conq-ic{background:rgba(134,220,185,.15);color:var(--menta)}
+  .saiba{width:100%;max-width:560px;text-align:left;background:var(--painel);border:1px solid var(--linha);border-radius:12px;padding:.6rem .9rem;font-size:.84rem;color:var(--suave)}
+  .saiba summary{cursor:pointer;color:var(--texto);font-weight:600;list-style:none}
+  .saiba summary::after{content:' +';color:var(--roxo)}
+  .saiba[open] summary::after{content:' −'}
+  .saiba ul{padding-left:1.1rem;margin-top:.5rem;display:grid;gap:.25rem}
+  .saiba li{color:var(--texto)}
+  .saiba .fontes li{color:var(--suave)}
+  .legenda{font-size:.78rem;color:var(--suave);text-align:center;max-width:960px}
+</style>
+</head>
+<body>
+
+<div class="cabeca">
+  <h1>Pacotes na Rede</h1>
+  <div class="hud">
+    <span>Fase <b id="hFase">1</b>/3</span>
+    <span class="dif" id="hDif">Fácil</span>
+    <span class="coracoes" id="hVidas"></span>
+    <span><svg class="ic moeda-ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v8"/></svg><b id="hMoedas">0</b></span>
+    <span><svg class="ic" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M9 9h6v6H9z"/></svg><b id="hPacotes">0</b></span>
+    <span><svg class="ic" viewBox="0 0 24 24"><path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6-5.3-3-5.3 3 1.2-6L3.4 9.3l6-.7z"/></svg><b id="hPontos">0</b></span>
+    <button class="som" id="btnSom" type="button">Som: desligado</button>
+    <button class="som" id="btnMusica" type="button">Música: desligada</button>
+  </div>
+</div>
+
+<div class="area">
+  <div class="tela" id="tela">
+    <canvas id="cv" width="1920" height="1080"></canvas>
+
+    <div class="sobre oculto" id="enigma">
+      <div class="sobre-in">
+        <p class="rotulo">Enigma do Eco do Ruído</p>
+        <h2>Decifre a chave do portão</h2>
+        <p>O Eco cifrou a frase com um deslocamento. Cada letra foi trocada pela que vem duas posições depois no alfabeto.</p>
+        <div class="cifra" id="cifra"></div>
+        <div class="entrada">
+          <input id="resp" type="text" maxlength="40" placeholder="Digite a frase decifrada" aria-label="Frase decifrada">
+          <button class="btn" id="btnDecifrar">Decifrar</button>
+        </div>
+        <p class="resposta" id="respTxt"></p>
+        <button class="btn sec" id="btnFecharEnigma">Voltar ao caminho</button>
+      </div>
+    </div>
+
+    <div class="sobre oculto" id="fim">
+      <div class="fim-in">
+        <p class="rotulo">Fim da conexão</p>
+        <h2>Game over</h2>
+        <p class="fim-txt" id="fimTxt"></p>
+        <div class="grade-stats" id="statsFim"></div>
+        <h3 class="sub">Conquistas <span id="contConqFim"></span></h3>
+        <div class="conq-grid" id="conqFim"></div>
+        <button class="btn" id="btnRetry">Tentar de novo</button>
+      </div>
+    </div>
+
+    <div class="sobre oculto" id="vitoria">
+      <div class="fim-in">
+        <p class="rotulo">Entrega concluída</p>
+        <h2>Mensagem entregue</h2>
+        <p class="fim-txt" id="vitTxt"></p>
+        <div class="grade-stats" id="statsVit"></div>
+        <h3 class="sub">Conquistas <span id="contConqVit"></span></h3>
+        <div class="conq-grid" id="conqVit"></div>
+        <details class="saiba">
+          <summary>Sobre Marian Croak</summary>
+          <ul>
+            <li>Engenheira e cientista da computação norte-americana.</li>
+            <li>Contribuiu para o VoIP, que permite chamadas de voz pela internet.</li>
+            <li>Registrou mais de 200 patentes ligadas à comunicação.</li>
+            <li>Entrou no Hall da Fama dos Inventores dos EUA em 2022.</li>
+          </ul>
+        </details>
+        <button class="btn" id="btnAgain">Jogar de novo</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="faixa" id="faixa">
+    <div class="missoes" id="painelMissoes"><h3>Missões</h3><ul id="listaMissoes"></ul></div>
+    <div class="mensagens">
+      <div class="carta-info" id="cartaInfo"><div class="cab-c"><span id="cartaCab">Curiosidade</span></div><p id="cartaTxt"></p></div>
+      <div class="dialogo" id="dialogo" hidden><div class="nome" id="dlgNome"></div><p id="dlgTxt"></p><span class="acao" id="dlgAcao"></span></div>
+    </div>
+  </div>
+
+  <div class="controles">
+    <div class="grupo">
+      <button class="tbtn" data-tecla="esq" aria-label="Andar para a esquerda"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <button class="tbtn" data-tecla="dir" aria-label="Andar para a direita"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+    </div>
+    <span class="teclas-dica">A/D andam · Espaço pula · E fala</span>
+    <div class="grupo">
+      <button class="tbtn falar" id="btnFalar" hidden aria-label="Falar"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></svg></button>
+      <button class="tbtn pulo" data-tecla="pulo" aria-label="Pular"><svg viewBox="0 0 24 24"><path d="M5 15l7-7 7 7"/></svg></button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ===== constantes ===== */
+const W = 960, H = 540, GROUND = 480;
+const G = 0.5, MAXQ = 14, ACC = 0.55, FRIC = 0.78, MAXV = 4.4, JUMP = -14;
+const FRASE = 'A VOZ VIAJA EM PACOTES';
+const DESLOCAMENTO = 2;
+const DIFICULDADES = [
+  { nome: 'Fácil', vel: 0.9, cor: '#86dcb9' },
+  { nome: 'Média', vel: 1.35, cor: '#f5c76b' },
+  { nome: 'Difícil', vel: 1.85, cor: '#f4937a' }
+];
+
+/* ===== curiosidades ===== */
+const CURIOSIDADE_FASE = [
+  'A voz é convertida em dados digitais antes de ir pela internet.',
+  'Marian Croak ajudou a criar a base do VoIP, que transmite voz pela internet.',
+  'Em 1993, Margaret Rossiter descreveu o Efeito Matilda.'
+];
+const FATOS = [
+  'O VoIP envia a voz como dados digitais.',
+  'A voz viaja em pacotes, que podem seguir caminhos diferentes.',
+  'No destino, os pacotes são reordenados pelo número.',
+  'Marian Croak tem mais de 200 patentes.',
+  'Em 2022, ela entrou no Hall da Fama dos Inventores dos EUA.',
+  'Após o Katrina (2005), doações por texto ajudaram na emergência.',
+  'Margaret Rossiter descreveu o Efeito Matilda em 1993.',
+  'WhatsApp e Zoom usam princípios do VoIP.'
+];
+
+/* ===== cifra do enigma (deslocamento de letras) ===== */
+function cifrar(t, k) {
+  return [...t].map(c => {
+    const m = c.charCodeAt(0);
+    if (c === ' ') return ' ';
+    if (m >= 65 && m <= 90) return String.fromCharCode(((m - 65 + k) % 26) + 65);
+    return c;
+  }).join('');
+}
+const CIFRADA = cifrar(FRASE, DESLOCAMENTO);
+const normalizar = t => t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase().replace(/[^A-Z]/g, '');
+
+/* ===== construtores de cenário ===== */
+const chao = (x1, x2) => ({ x: x1, y: GROUND, w: x2 - x1, h: 60, chao: true });
+const plat = (x, y, w) => ({ x, y, w, h: 20 });
+const movel = (x, y, w, minX, maxX, spd) => ({ x, y, w, h: 20, mov: true, minX, maxX, spd, dir: 1, dx: 0 });
+const inimigoT = (tipo, x, minX, maxX, extra = {}) => ({ tipo, x, y: GROUND - 28, w: 30, h: 28, minX, maxX, dir: 1, ...extra });
+const interf = (x, minX, maxX) => inimigoT('interf', x, minX, maxX);
+const atraso = (x, minX, maxX) => inimigoT('atraso', x, minX, maxX);
+const spamGrupo = (x, minX, maxX) => [0, 1, 2].map(i => ({ tipo: 'spam', x: x + i * 20, y: GROUND - 14, w: 16, h: 14, minX, maxX, dir: 1 }));
+const eco = (x, minX, maxX) => inimigoT('eco', x, minX, maxX);
+
+const moedas = pts => pts.map(([x, y]) => ({ x, y, pego: false }));
+
+/* ===== fases ===== */
+const FASES = [
+  {
+    nome: 'Fase 1', dif: 0, checkpoint: [1200, GROUND - 38], largura: 2600, meta: 2520, portao: false,
+    curiosidade: CURIOSIDADE_FASE[0],
+    solidos: [chao(0, 700), chao(780, 1480), chao(1560, 2600),
+      plat(420, 370, 140), plat(640, 250, 120), plat(900, 330, 120), plat(1160, 370, 150),
+      plat(1400, 250, 130), plat(1760, 370, 130), plat(2040, 250, 120), plat(2300, 370, 140)],
+    extras: [[600, 420], [1000, 420], [1900, 420]],
+    moedas: moedas([[330, 440], [500, 330], [690, 210], [960, 290], [1240, 330], [1470, 210], [1820, 330], [2000, 440], [2090, 210], [2360, 330]]),
+    inimigos: [interf(520, 480, 660), interf(1000, 800, 1400), interf(2000, 1600, 2500)],
+    npcs: [{ x: 1080, tipo: 'tecnica', nome: 'Técnica da central', cor: { cabelo: '#2b1d12', roupa: '#86dcb9', detalhe: '#c8f5e3', calca: '#1b1320' },
+      falas: ['Oi! Eu cuido da central de pacotes.', 'Cada carta roxa tem um pedaço da mensagem. Colete o máximo que puder.', 'Boa sorte na rede!'] }],
+    missoes: [
+      { txt: 'Colete 6 moedas', tipo: 'moedas', alvo: 6 },
+      { txt: 'Fale com a técnica da central', tipo: 'falar', alvo: 'tecnica' },
+      { txt: 'Elimine 2 ruídos', tipo: 'ruidos', alvo: 2 }
+    ]
+  },
+  {
+    nome: 'Fase 2', dif: 1, checkpoint: [1300, GROUND - 38], largura: 2800, meta: 2740, portao: false,
+    curiosidade: CURIOSIDADE_FASE[1],
+    solidos: [chao(0, 500), chao(600, 980), chao(1100, 1500), chao(1600, 2050), chao(2200, 2800),
+      plat(200, 370, 130), plat(400, 250, 120), movel(520, 330, 110, 470, 640, 1.2),
+      movel(1000, 330, 100, 960, 1140, 1.4), plat(1260, 370, 130), plat(1460, 250, 110),
+      plat(1700, 370, 120), plat(1930, 250, 120), plat(2250, 370, 130), plat(2480, 250, 130)],
+    extras: [[300, 420], [860, 420], [1800, 420], [2400, 420]],
+    moedas: moedas([[240, 320], [450, 210], [590, 262], [880, 440], [1040, 290], [1300, 320], [1500, 210], [1760, 320], [1960, 210], [2290, 320], [2520, 210]]),
+    inimigos: [atraso(680, 620, 960), ...spamGrupo(1250, 1120, 1480), atraso(1850, 1620, 2030), ...spamGrupo(2400, 2220, 2780)],
+    npcs: [{ x: 1380, tipo: 'engenheira', nome: 'Engenheira de rede', cor: { cabelo: '#4a2c1a', roupa: '#f5c76b', detalhe: '#fde68a', calca: '#2a2236' },
+      falas: ['Os pacotes precisam chegar, mesmo fora de ordem.', 'Leve pacotes pela rede e a rota fica estável.', 'Continue, a mensagem está quase lá.'] }],
+    missoes: [
+      { txt: 'Colete 8 moedas', tipo: 'moedas', alvo: 8 },
+      { txt: 'Leve 3 pacotes até o destino', tipo: 'pacotes', alvo: 3 },
+      { txt: 'Fale com a engenheira de rede', tipo: 'falar', alvo: 'engenheira' }
+    ]
+  },
+  {
+    nome: 'Fase 3', dif: 2, checkpoint: [1450, GROUND - 38], largura: 3000, meta: 2930, portao: true,
+    curiosidade: CURIOSIDADE_FASE[2],
+    solidos: [chao(0, 420), chao(540, 820), chao(940, 1180), chao(1300, 1640), chao(1800, 2040), chao(2320, 3000),
+      plat(220, 370, 120), plat(450, 250, 110), movel(840, 330, 110, 820, 980, 1.8),
+      plat(1200, 370, 120), plat(1380, 250, 120), movel(1600, 330, 100, 1500, 1720, 1.8),
+      plat(1860, 370, 120), plat(2080, 250, 120), plat(2400, 370, 110), plat(2580, 250, 120), plat(2780, 370, 110)],
+    extras: [[640, 420], [1080, 420], [1900, 420], [2500, 420]],
+    moedas: moedas([[250, 320], [480, 210], [700, 220], [980, 320], [1240, 320], [1420, 210], [1640, 290], [1900, 320], [2110, 210], [2440, 320], [2600, 210]]),
+    inimigos: [eco(600, 560, 800), atraso(1100, 1040, 1220), eco(1400, 1320, 1620), atraso(1900, 1820, 2020), eco(2550, 2340, 2980)],
+    npcs: [
+      { x: 2380, tipo: 'lia', nome: 'Lia · Comunicação', cor: { cabelo: '#f4937a', roupa: '#f4937a', detalhe: '#fde68a', calca: '#2a2236' },
+        falas: ['Eu sou a Lia. O Eco trancou o portão com uma chave cifrada.', 'Cada letra foi deslocada duas posições. Volte duas letras para decifrar.', 'Vá até o Eco e decifrem juntos.'] },
+      { x: 2680, tipo: 'boss', boss: true, nome: 'Eco do Ruído', cor: null,
+        falasAntes: ['Só deixo passar quem decifrar meu código.', 'Procure a Lia. Ela conhece a cifra.'],
+        falasDepois: ['O portão já está aberto. Siga em frente.'] }
+    ],
+    missoes: [
+      { txt: 'Colete 8 moedas', tipo: 'moedas', alvo: 8 },
+      { txt: 'Fale com a Lia', tipo: 'falar', alvo: 'lia' },
+      { txt: 'Decifre o enigma do Eco', tipo: 'enigma', alvo: 1 }
+    ]
+  }
+];
+
+/* ===== conquistas ===== */
+const ICONES = {
+  pacote: '<rect x="4" y="4" width="16" height="16" rx="4"/><path d="M9 9h6v6H9z"/>',
+  estrela: '<path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6-5.3-3-5.3 3 1.2-6L3.4 9.3l6-.7z"/>',
+  escudo: '<path d="M12 3l8 3v6c0 4.5-3.4 8-8 9-4.6-1-8-4.5-8-9V6z"/>',
+  livro: '<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2zM4 5v16"/>',
+  antena: '<path d="M12 12v9M8 21h8M12 12l-5-5M12 12l5-5M7 7a7 7 0 0 1 10 0"/><circle cx="12" cy="12" r="1.6"/>',
+  check: '<path d="m5 12 5 5 9-10"/>',
+  coracao: '<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>',
+  onibus: '<rect x="3" y="7" width="18" height="10" rx="2"/><path d="M3 12h18M7 17v2M17 17v2"/>',
+  moeda: '<circle cx="12" cy="12" r="8"/><path d="M12 8v8"/>',
+  chave: '<circle cx="8" cy="12" r="4"/><path d="M12 12h9M18 12v3M21 12v2"/>',
+  chat: '<path d="M4 5h16v11H9l-5 4z"/>'
+};
+const icone = nome => `<svg class="ic" viewBox="0 0 24 24">${ICONES[nome]}</svg>`;
+
+const st = { pacotes: 0, inimigos: 0, quedas: 0, quedasFase: 0, fasesConcluidas: 0, fasesSemQueda: 0, carona: 0,
+  moedas: 0, missoesCumpridas: 0, chave: false, falouLia: false, fatosVistos: new Set() };
+const CONQUISTAS = [
+  { nome: 'Primeiro pacote', desc: 'Colete o primeiro pacote.', icone: 'pacote', ok: () => st.pacotes >= 1 },
+  { nome: 'Colecionadora', desc: 'Colete 10 pacotes no total.', icone: 'estrela', ok: () => st.pacotes >= 10 },
+  { nome: 'Moedeira', desc: 'Junte 40 moedas no total.', icone: 'moeda', ok: () => st.moedas >= 40 },
+  { nome: 'Missão cumprida', desc: 'Conclua 3 missões.', icone: 'check', ok: () => st.missoesCumpridas >= 3 },
+  { nome: 'Ruído eliminado', desc: 'Elimine 3 inimigos de ruído.', icone: 'escudo', ok: () => st.inimigos >= 3 },
+  { nome: 'Curiosa', desc: 'Leia todas as 8 curiosidades das cartas.', icone: 'livro', ok: () => st.fatosVistos.size >= FATOS.length },
+  { nome: 'Carona', desc: 'Pegue carona numa plataforma móvel.', icone: 'onibus', ok: () => st.carona >= 1 },
+  { nome: 'Decifradora', desc: 'Decifre o enigma do Eco.', icone: 'chave', ok: () => st.chave },
+  { nome: 'Rede estável', desc: 'Conclua uma fase sem cair em buracos.', icone: 'antena', ok: () => st.fasesSemQueda >= 1 },
+  { nome: 'Rede completa', desc: 'Conclua as três fases.', icone: 'check', ok: () => st.fasesConcluidas >= 3 }
+];
+function renderConquistas(id, contId) {
+  const ok = CONQUISTAS.filter(c => c.ok()).length;
+  document.getElementById(contId).textContent = `${ok} de ${CONQUISTAS.length}`;
+  document.getElementById(id).innerHTML = CONQUISTAS.map(c =>
+    `<div class="conq-item ${c.ok() ? 'ok' : ''}"><span class="conq-ic">${icone(c.icone)}</span><b>${c.nome}</b><small>${c.desc}</small></div>`).join('');
+}
+function renderStats(id) {
+  const itens = [['Fase', faseIdx + 1], ['Pacotes', st.pacotes], ['Moedas', st.moedas], ['Pontos', pontos]];
+  document.getElementById(id).innerHTML = itens.map(([n, v]) => `<div class="stat"><b>${v}</b><small>${n}</small></div>`).join('');
+}
+
+/* ===== estado ===== */
+const cv = document.getElementById('cv'), ctx = cv.getContext('2d');
+ctx.imageSmoothingEnabled = true;
+let faseIdx = 0, fase, solidos, pacotes, inimigos, moedasFase, npcs, p, fp;
+let vidas = 3, pontos = 0, camX = 0, invul = 0, frame = 0, fatoIdx = 0, cartaTimer, dlgTimer, gateMsgT = 0;
+let estado = 'jogando', faseTerminada = false, pulsoAnt = false, enigmaAberto = false, interagiAnt = false;
+const teclas = { esq: false, dir: false, pulo: false, falar: false };
+
+/* progresso da fase atual (missões) */
+function progressoMissao(m) {
+  switch (m.tipo) {
+    case 'moedas': return fp.moedas;
+    case 'pacotes': return fp.pacotes;
+    case 'ruidos': return fp.ruidos;
+    case 'falar': return fp.falou.has(m.alvo) ? 1 : 0;
+    case 'enigma': return st.chave ? 1 : 0;
+  }
+  return 0;
+}
+function verificarMissoes() {
+  for (const m of fp.missoes) {
+    if (m.feita) continue;
+    if (progressoMissao(m) >= m.alvo) {
+      m.feita = true;
+      st.missoesCumpridas++;
+      tocar('missao');
+      pontos += 150;
+      mostrarCarta('Missão cumprida', m.txt, 2600);
+      atualizarHud();
+    }
+  }
+  renderMissoes();
+}
+function renderMissoes() {
+  document.getElementById('listaMissoes').innerHTML = fp.missoes.map(m => {
+    const prog = m.tipo === 'enigma' || m.tipo === 'falar' ? '' : ` (${Math.min(progressoMissao(m), m.alvo)}/${m.alvo})`;
+    return `<li class="${m.feita ? 'ok' : ''}"><span class="bolinha"></span>${m.txt}${prog}</li>`;
+  }).join('');
+}
+
+function atualizarHud() {
+  document.getElementById('hFase').textContent = faseIdx + 1;
+  const d = DIFICULDADES[fase.dif];
+  const el = document.getElementById('hDif');
+  el.textContent = d.nome; el.style.color = d.cor;
+  document.getElementById('hMoedas').textContent = st.moedas;
+  document.getElementById('hPacotes').textContent = st.pacotes;
+  document.getElementById('hPontos').textContent = pontos;
+  document.getElementById('hVidas').innerHTML = [0, 1, 2].map(i =>
+    `<svg class="ic" viewBox="0 0 24 24" style="opacity:${i < vidas ? 1 : .2}">${ICONES.coracao}</svg>`).join('');
+}
+function mostrarCarta(cab, txt, ms = 3400) {
+  document.getElementById('cartaCab').textContent = cab;
+  document.getElementById('cartaTxt').textContent = txt;
+  const el = document.getElementById('cartaInfo');
+  el.classList.add('mostrar');
+  clearTimeout(cartaTimer);
+  cartaTimer = setTimeout(() => el.classList.remove('mostrar'), ms);
+}
+function montarPacotes(f) {
+  const lista = [];
+  f.solidos.forEach((s, i) => {
+    if (s.chao) return;
+    lista.push({ ref: s.mov ? i : -1, offX: s.w / 2 - 11, offY: -46, x: s.x + s.w / 2 - 11, y: s.y - 46, w: 22, h: 22, pego: false });
+  });
+  f.extras.forEach(([x, y]) => lista.push({ ref: -1, x, y, w: 22, h: 22, pego: false }));
+  return lista;
+}
+function carregarFase(i) {
+  faseIdx = i;
+  fase = FASES[i];
+  solidos = fase.solidos.map(s => ({ ...s }));
+  pacotes = montarPacotes(fase);
+  moedasFase = fase.moedas.map(m => ({ ...m }));
+  const vel = DIFICULDADES[fase.dif].vel;
+  inimigos = fase.inimigos.map(e => ({ ...e, morto: 0, sumiu: false, dir: 1, spd: vel }));
+  npcs = fase.npcs.map(n => ({ ...n, idx: 0 }));
+  fp = { moedas: 0, pacotes: 0, ruidos: 0, falou: new Set(), missoes: fase.missoes.map(m => ({ ...m, feita: false })) };
+  p = { x: 60, y: GROUND - 38, w: 26, h: 38, vx: 0, vy: 0, onGround: false, plat: null, coyote: 0, buffer: 0, jumpLock: 0, facing: 1 };
+  camX = 0; camY = H - VIS_H; poeira = []; cp = null; invul = 0; faseTerminada = false; st.quedasFase = 0;
+  atualizarHud();
+  renderMissoes();
+}
+function mostrarTela(id) {
+  ['fim', 'vitoria'].forEach(t => document.getElementById(t).classList.toggle('oculto', t !== id));
+}
+function iniciar(i) {
+  estado = 'jogando';
+  mostrarTela(null);
+  carregarFase(i);
+  const d = DIFICULDADES[fase.dif];
+  mostrarCarta(`Curiosidade da ${fase.nome.toLowerCase()} · ${d.nome}`, fase.curiosidade, 6500);
+}
+function gameOver() {
+  estado = 'fim';
+  document.getElementById('fimTxt').textContent = `Você chegou à fase ${faseIdx + 1}. Tente de novo, o caminho está lá.`;
+  tocar('gameover');
+  renderStats('statsFim'); renderConquistas('conqFim', 'contConqFim');
+  mostrarTela('fim');
+}
+function vitoria() {
+  estado = 'vitoria';
+  tocar('fase');
+  pontos += 300; atualizarHud();
+  document.getElementById('vitTxt').textContent = 'Você decifrou o enigma, abriu o portão e entregou a mensagem.';
+  renderStats('statsVit'); renderConquistas('conqVit', 'contConqVit');
+  mostrarTela('vitoria');
+}
+function novaPartida() {
+  vidas = 3; pontos = 0; pulsoAnt = false;
+  Object.assign(st, { pacotes: 0, inimigos: 0, quedas: 0, fasesConcluidas: 0, fasesSemQueda: 0, carona: 0, moedas: 0, missoesCumpridas: 0, chave: false, falouLia: false });
+  st.fatosVistos = new Set(); fatoIdx = 0;
+  iniciar(0);
+}
+async function telaCheia() {
+  try {
+    if (document.documentElement.requestFullscreen && !document.fullscreenElement) await document.documentElement.requestFullscreen();
+  } catch (e) { /* opcional */ }
+}
+
+/* ===== colisão e física ===== */
+const sobrepoe = (a, b) => a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+
+function perdeVida(motivo) {
+  vidas--; st.quedas++; st.quedasFase++;
+  atualizarHud();
+  if (vidas <= 0) { fimDeVidas(); return; }
+  mostrarCarta('Conexão caiu', motivo, 2600);
+  const [rx, ry] = cp ? cp : [60, GROUND - 38];
+  p.x = rx; p.y = ry; p.vx = 0; p.vy = 0; p.plat = null;
+  invul = 90;
+  iniciarEfeitoDano('buraco');
+  tocar('dano');
+}
+
+/* personagem não-jogador mais próximo, dentro do alcance */
+function npcProximo() {
+  let melhor = null, menor = Infinity;
+  for (const n of npcs) {
+    if (n.derrotado) continue;
+    const largura = n.boss ? 72 : 24;
+    const d = Math.abs((p.x + p.w / 2) - (n.x + largura / 2));
+    if (d < 90 && d < menor) { menor = d; melhor = n; }
+  }
+  return melhor;
+}
+
+/* ===== conversas: começam ao tocar em conversar, avançam a cada toque e se encerram ao final ===== */
+let conversa = null;
+function mostrarFala() {
+  const dlg = document.getElementById('dialogo');
+  if (!conversa) { dlg.hidden = true; return; }
+  const ultima = conversa.i >= conversa.linhas.length - 1;
+  document.getElementById('dlgNome').textContent = conversa.npc.nome;
+  document.getElementById('dlgTxt').textContent = conversa.linhas[conversa.i];
+  document.getElementById('dlgAcao').textContent = ultima ? 'Toque em conversar para encerrar' : 'Toque em conversar para continuar';
+  dlg.hidden = false;
+}
+function fecharConversa() {
+  conversa = null;
+  document.getElementById('dialogo').hidden = true;
+}
+function linhasDe(n) {
+  if (n.boss) {
+    if (!st.falouLia) return n.falasAntes;
+    if (!st.chave) return null;
+    return n.falasDepois;
+  }
+  return n.falas;
+}
+function interagir() {
+  if (estado !== 'jogando' || enigmaAberto || bossMorte) return;
+  if (conversa) {
+    if (conversa.i < conversa.linhas.length - 1) { conversa.i++; mostrarFala(); tocar('dialogo'); }
+    else fecharConversa();
+    return;
+  }
+  const n = npcProximo();
+  if (!n) { mostrarCarta('Aviso', 'Não há ninguém por perto.', 1800); return; }
+  const linhas = linhasDe(n);
+  if (!linhas) { abrirEnigma(); return; }
+  conversa = { npc: n, linhas, i: 0 };
+  if (n.tipo) fp.falou.add(n.tipo);
+  if (n.tipo === 'lia') { st.falouLia = true; n.seguindo = true; }
+  mostrarFala();
+  tocar('dialogo');
+  verificarMissoes();
+}
+
+/* ===== enigma com dicas da Lia ===== */
+const DICAS_LIA = [
+  'Dica da Lia: o primeiro C vira A. Volte duas letras a partir do C.',
+  'Dica da Lia: XQB vira VOZ. Cada letra recua duas posições, como no exemplo.',
+  'Dica da Lia: a frase começa com A VOZ e termina com PACOTES. Falta preencher o meio.'
+];
+let errosEnigma = 0;
+let bossMorte = null, flashMorte = 0;
+
+function abrirEnigma() {
+  enigmaAberto = true;
+  teclas.esq = teclas.dir = teclas.pulo = teclas.falar = false;
+  if (conversa) fecharConversa();
+  document.getElementById('cifra').textContent = CIFRADA;
+  const resp = document.getElementById('resp');
+  resp.value = '';
+  const respTxt = document.getElementById('respTxt');
+  respTxt.textContent = errosEnigma ? DICAS_LIA[Math.min(errosEnigma - 1, DICAS_LIA.length - 1)] : 'Lia: volte duas letras no alfabeto para cada letra cifrada.';
+  respTxt.className = 'resposta';
+  document.getElementById('enigma').classList.remove('oculto');
+  setTimeout(() => resp.focus(), 50);
+}
+function fecharEnigma() {
+  enigmaAberto = false;
+  document.getElementById('enigma').classList.add('oculto');
+}
+function tentarDecifrar() {
+  const tentativa = normalizar(document.getElementById('resp').value);
+  const respTxt = document.getElementById('respTxt');
+  if (tentativa === normalizar(FRASE)) {
+    respTxt.textContent = 'Correto! O Eco perdeu a força...';
+    respTxt.className = 'resposta certo';
+    pontos += 250;
+    atualizarHud();
+    tocar('chave');
+    setTimeout(() => { fecharEnigma(); iniciarMorteBoss(); }, 900);
+  } else {
+    errosEnigma++;
+    tocar('erro');
+    respTxt.textContent = 'Ainda não é isso. ' + DICAS_LIA[Math.min(errosEnigma - 1, DICAS_LIA.length - 1)];
+    respTxt.className = 'resposta erro';
+    const el = document.getElementById('resp');
+    el.style.animation = 'none'; void el.offsetWidth; el.style.animation = '';
+  }
+}
+
+/* ===== morte dramática do Eco do Ruído (linha do tempo em quadros) =====
+   0-95: tremor, inchaço e rachaduras · 95: explosão · 170: portão abre e Lia comenta · 260: fim */
+function iniciarMorteBoss() {
+  const boss = npcs.find(n => n.boss);
+  if (!boss) return;
+  bossMorte = { t: 0, boss, pecas: [], explodiu: false, fim: false };
+  mostrarCarta('Eco do Ruído', 'O Eco começou a se desfazer!', 3000);
+}
+function atualizarMorteBoss() {
+  const bm = bossMorte;
+  if (flashMorte > 0) flashMorte = Math.max(0, flashMorte - 0.035);
+  if (!bm) return;
+  bm.t++;
+  if (bm.t === 95) {
+    const cx = bm.boss.x + 36, cy = GROUND - 36;
+    const cores = ['#e0715c', '#b5483a', '#f4937a', '#7a2a20', '#ffb4a2'];
+    for (let i = 0; i < 36; i++) {
+      const a = Math.random() * Math.PI * 2, v = 3 + Math.random() * 7;
+      bm.pecas.push({ x: cx, y: cy, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 4,
+        r: 3 + Math.random() * 7, rot: Math.random() * 6, vr: (Math.random() - 0.5) * 0.4, cor: cores[i % cores.length] });
+    }
+    bm.boss.derrotado = true;
+    flashMorte = 1;
+    tocar('explosao');
+  }
+  if (bm.t > 95) {
+    for (const pc of bm.pecas) {
+      pc.x += pc.vx; pc.y += pc.vy; pc.vy += 0.3; pc.rot += pc.vr; pc.vx *= 0.99;
+    }
+  }
+  if (bm.t === 170) {
+    st.chave = true;
+    tocar('portao');
+    verificarMissoes();
+    mostrarCarta('Chave obtida', 'O Eco do Ruído se desfez e o portão se abriu. Chegue até o destinatário!', 4200);
+    const lia = npcs.find(n => n.tipo === 'lia');
+    if (lia) {
+      conversa = { npc: lia, linhas: ['Conseguimos! A mensagem está livre.', 'Vamos até o destinatário.'], i: 0 };
+      mostrarFala();
+    }
+  }
+  if (bm.t >= 260) bossMorte = null;
+}
+
+/* ===== comportamento dos inimigos ===== */
+const MENSAGENS_DANO = {
+  interf: 'A interferência atrapalhou o sinal.',
+  spam: 'Um spam bloqueou o caminho.',
+  atraso: 'O atraso travou a mensagem.',
+  eco: 'O eco alcançou a mensagem.'
+};
+const podePisar = () => true;
+
+function sofrerDano(txt, empurrao, tipo = 'ruido') {
+  if (invul > 0) return false;
+  vidas--; invul = 100; p.vy = -7; p.vx = empurrao;
+  tocar('dano');
+  iniciarEfeitoDano(tipo);
+  atualizarHud();
+  if (vidas <= 0) { fimDeVidas(); return true; }
+  mostrarCarta('Ruído na linha', txt, 2200);
+  return false;
+}
+function matarInimigo(e) {
+  e.morto = 40; p.vy = -9; pontos += 100; st.inimigos++; fp.ruidos++;
+  tocar('inimigoMorre');
+  atualizarHud(); verificarMissoes();
+}
+function comportamentoInimigo(e) {
+  if (e.tipo === 'eco') {
+    e.x += (p.x - e.x - 4) * 0.035;
+    e.x = Math.max(e.minX, Math.min(e.maxX, e.x));
+    return;
+  }
+  const vel = 1;
+  e.x += e.spd * vel * e.dir;
+  if (e.x <= e.minX) e.dir = 1;
+  if (e.x + e.w >= e.maxX) e.dir = -1;
+}
+
+function atualizar() {
+  /* plataformas móveis */
+  for (const s of solidos) {
+    if (!s.mov) continue;
+    s.x += s.spd * s.dir;
+    s.dx = s.spd * s.dir;
+    if (s.x <= s.minX) { s.x = s.minX; s.dir = 1; }
+    if (s.x + s.w >= s.maxX) { s.x = s.maxX - s.w; s.dir = -1; }
+  }
+  if (p.plat && p.onGround) p.x += p.plat.dx;
+
+  /* andar */
+  const acc = p.onGround ? ACC : ACC * 1.25;
+  if (teclas.esq && !teclas.dir) { p.vx -= acc; p.facing = -1; }
+  else if (teclas.dir && !teclas.esq) { p.vx += acc; p.facing = 1; }
+  else p.vx *= FRIC;
+  p.vx = Math.max(-MAXV, Math.min(MAXV, p.vx));
+
+  /* pulo */
+  if (teclas.pulo && !pulsoAnt) p.buffer = 10;
+  pulsoAnt = teclas.pulo;
+  if (p.buffer > 0) p.buffer--;
+  if (p.onGround) p.coyote = 8; else if (p.coyote > 0) p.coyote--;
+  if (p.buffer > 0 && p.coyote > 0) { p.vy = JUMP; p.onGround = false; p.plat = null; p.buffer = 0; p.coyote = 0; p.jumpLock = 14; tocar('pulo'); }
+  if (p.jumpLock > 0) p.jumpLock--;
+  if (!teclas.pulo && p.jumpLock === 0 && p.vy < -4) p.vy = -4;
+
+  /* conversar: uma vez por toque */
+  const querFalar = teclas.falar;
+  if (querFalar && !interagiAnt) interagir();
+  interagiAnt = querFalar;
+
+  /* a conversa se encerra quando você se afasta */
+  if (conversa && Math.abs(p.x - conversa.npc.x) > 170) fecharConversa();
+
+  /* Lia acompanha o personagem depois da primeira conversa */
+  for (const n of npcs) {
+    if (!n.seguindo || n.derrotado) continue;
+    const alvo = p.x + p.w / 2 - 12 + (p.facing > 0 ? -46 : 46);
+    const d = alvo - n.x;
+    if (Math.abs(d) > 1) n.x += Math.sign(d) * Math.min(Math.abs(d), Math.max(1.6, Math.abs(d) * 0.1));
+    n.x = Math.max(0, Math.min(fase.largura - 24, n.x));
+  }
+
+  const yAnterior = p.y;
+
+  p.x += p.vx;
+  for (const s of solidos) {
+    if (sobrepoe(p, s)) {
+      if (p.vx > 0) p.x = s.x - p.w; else if (p.vx < 0) p.x = s.x + s.w;
+      p.vx = 0;
+    }
+  }
+  p.vy = Math.min(p.vy + (p.vy > 0 ? G * 1.35 : G), MAXQ);
+  p.y += p.vy;
+  p.onGround = false;
+  p.plat = null;
+  for (const s of solidos) {
+    if (sobrepoe(p, s)) {
+      if (p.vy > 0) {
+        p.y = s.y - p.h;
+        if (s.mov && !p.onGround) st.carona++;
+        if (p.vy > 3) { spawnPoeira(p.x + p.w / 2, p.y + p.h); landT = 8; }
+        p.onGround = true;
+        if (s.mov) p.plat = s;
+      } else if (p.vy < 0) p.y = s.y + s.h;
+      p.vy = 0;
+    }
+  }
+  if (p.x < 0) p.x = 0;
+  if (p.x + p.w > fase.largura) p.x = fase.largura - p.w;
+
+  if (p.y > H + 60) { perdeVida('A conexão caiu num buraco. Você volta ao início da fase.'); return; }
+
+  /* inimigos */
+  for (const e of inimigos) {
+    if (e.sumiu) continue;
+    if (e.morto > 0) { e.morto--; if (e.morto === 0) e.sumiu = true; continue; }
+    comportamentoInimigo(e);
+    if (e.tipo === 'atraso' && Math.floor(frame / 120) % 2 === 1) continue;
+    if (!sobrepoe(p, e)) continue;
+    if (podePisar(e) && yAnterior + p.h <= e.y + 8 && p.vy >= 0) { matarInimigo(e); continue; }
+    if (sofrerDano(MENSAGENS_DANO[e.tipo] || 'O ruído atingiu a mensagem.', p.x < e.x ? -5 : 5, e.tipo || 'ruido')) return;
+  }
+  if (invul > 0) invul--;
+
+  /* moedas */
+  for (const m of moedasFase) {
+    if (m.pego) continue;
+    if (sobrepoe(p, { x: m.x - 2, y: m.y, w: 12, h: 14 })) {
+      m.pego = true;
+      st.moedas++; fp.moedas++; pontos += 10;
+      tocar('moeda');
+      atualizarHud(); verificarMissoes();
+    }
+  }
+
+  /* cartas de informação (pacotes) */
+  for (const c of pacotes) {
+    if (c.ref >= 0) { c.x = solidos[c.ref].x + c.offX; c.y = solidos[c.ref].y + c.offY; }
+    if (c.pego) continue;
+    if (sobrepoe(p, { x: c.x + 2, y: c.y + 2, w: 18, h: 18 })) {
+      c.pego = true;
+      st.pacotes++; fp.pacotes++; pontos += 50;
+      tocar('pacote');
+      const idx = fatoIdx % FATOS.length;
+      st.fatosVistos.add(idx);
+      fatoIdx++;
+      mostrarCarta(`Carta ${idx + 1} de ${FATOS.length}`, FATOS[idx]);
+      atualizarHud(); verificarMissoes();
+    }
+  }
+
+  /* ponto de salvamento */
+  if (!cp && fase.checkpoint && p.x >= fase.checkpoint[0]) {
+    cp = [fase.checkpoint[0], fase.checkpoint[1]];
+    mostrarCarta('Ponto de salvamento', 'Se as vidas acabarem, você volta daqui.', 2600);
+    tocar('missao');
+  }
+
+  /* destinatário ou portão */
+  const meta = { x: fase.meta, y: GROUND - 130, w: 40, h: 130 };
+  if (!faseTerminada && sobrepoe(p, meta)) {
+    if (fase.portao && !st.chave) {
+      if (gateMsgT <= 0) mostrarCarta('Portão trancado', 'Ele só abre com a chave. Encontre o Eco e decifre o enigma.', 2800);
+      gateMsgT = 240;
+    } else {
+      faseTerminada = true;
+      st.fasesConcluidas++;
+      tocar('fase');
+      if (st.quedasFase === 0) st.fasesSemQueda++;
+      const ultima = faseIdx === FASES.length - 1;
+      mostrarCarta('Fase concluída', ultima ? 'A mensagem chegou ao destino!' : 'A mensagem chegou ao destinatário. Próxima fase!', 2400);
+      setTimeout(() => {
+        if (estado !== 'jogando') return;
+        if (!ultima) iniciar(faseIdx + 1);
+        else vitoria();
+      }, 1800);
+    }
+  }
+  if (gateMsgT > 0) gateMsgT--;
+
+  const alvoX = Math.max(0, Math.min(fase.largura - VIS_W, p.x - VIS_W * 0.4));
+  const alvoY = Math.max(0, Math.min(H - VIS_H, p.y + p.h - VIS_H * 0.65));
+  camX += (alvoX - camX) * 0.18;
+  camY += (alvoY - camY) * 0.1;
+}
+
+/* ===== desenho 2D refinado ===== */
+const ZOOM = 1.4;
+const VIS_W = W / ZOOM;
+const VIS_H = H / ZOOM;
+let camY = 0;
+let cp = null;
+let poeira = [];
+let landT = 0;
+const K = 2;
+const CONTORNO = '#120c1c';
+const PALETAS = [
+  ['#2c1e4c', '#171130', '#0b0814'],
+  ['#1e3a4c', '#112430', '#08141c'],
+  ['#4c1e3a', '#2a1126', '#14080f']
+];
+function desenharFrente() {
+  ctx.fillStyle = grad(0, H - 120, 0, H, [[0, 'rgba(30,20,50,0)'], [1, 'rgba(30,20,50,.45)']]);
+  ctx.fillRect(0, H - 120, W, 120);
+}
+const CORES_JOGADOR = { cabelo: '#1b1320', roupa: '#7c5ce0', detalhe: '#a78bfa', calca: '#2a2236', pele: '#8a5a44' };
+
+function tom(hex, k) {
+  const n = parseInt(hex.slice(1), 16);
+  const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+  const f = v => Math.max(0, Math.min(255, Math.round(k > 0 ? v + (255 - v) * k : v * (1 + k))));
+  return `rgb(${f(r)},${f(g)},${f(b)})`;
+}
+function caminhoRR(x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+function rr(x, y, w, h, r, fill, stroke, lw = 1.5) {
+  caminhoRR(x, y, w, h, r);
+  if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+  if (stroke) { ctx.lineWidth = lw; ctx.strokeStyle = stroke; ctx.stroke(); }
+}
+function circ(x, y, r, fill, stroke, lw = 1.5) {
+  ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
+  if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+  if (stroke) { ctx.lineWidth = lw; ctx.strokeStyle = stroke; ctx.stroke(); }
+}
+function grad(x0, y0, x1, y1, stops) {
+  const g = ctx.createLinearGradient(x0, y0, x1, y1);
+  stops.forEach(([o, c]) => { if (c) g.addColorStop(o, c); });
+  return g;
+}
+function gradR(x, y, r0, r1, stops) {
+  const g = ctx.createRadialGradient(x, y, r0, x, y, r1);
+  stops.forEach(([o, c]) => { if (c) g.addColorStop(o, c); });
+  return g;
+}
+function rotuloCanvas(texto, x, y, cor) {
+  ctx.font = 'bold 12px system-ui, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  const w = ctx.measureText(texto).width + 16;
+  rr(x - w / 2, y - 10, w, 20, 10, 'rgba(15,12,20,.82)', cor, 1);
+  ctx.fillStyle = cor;
+  ctx.fillText(texto, x, y);
+}
+
+/* ===== cenário ===== */
+function desenharCeu() {
+  const pal = PALETAS[fase ? fase.dif : 0];
+  ctx.fillStyle = grad(0, 0, 0, H, [[0, pal[0]], [0.55, pal[1]], [1, pal[2]]]);
+  ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = gradR(760, 120, 10, 120, [[0, 'rgba(233,213,255,.35)'], [1, 'rgba(233,213,255,0)']]);
+  ctx.fillRect(620, 0, 280, 260);
+  circ(760, 120, 34, '#ede3ff');
+  circ(748, 112, 6, 'rgba(0,0,0,.07)');
+  circ(772, 132, 9, 'rgba(0,0,0,.05)');
+  for (let i = 0; i < 90; i++) {
+    const x = (i * 231) % W, y = (i * 97) % 330;
+    ctx.globalAlpha = 0.35 + 0.35 * Math.sin(frame * 0.05 + i);
+    circ(x, y, i % 7 === 0 ? 1.8 : 1.1, '#e9d5ff');
+  }
+  ctx.globalAlpha = 1;
+}
+
+function desenharFundoParalaxe() {
+  const camadas = [
+    { par: 0.12, base: 350, amp: 60, cor: '#241a3d', f: 0.0042, off: 0 },
+    { par: 0.3, base: 395, amp: 50, cor: '#2d2149', f: 0.0065, off: 2 },
+    { par: 0.5, base: 440, amp: 36, cor: '#3a2a5c', f: 0.009, off: 4 }
+  ];
+  for (const c of camadas) {
+    ctx.beginPath();
+    ctx.moveTo(0, H);
+    for (let x = 0; x <= W; x += 8) {
+      const wx = x + camX * c.par;
+      const y = c.base - Math.abs(Math.sin(wx * c.f + c.off)) * c.amp - Math.sin(wx * c.f * 2.3) * 8;
+      ctx.lineTo(x, y);
+    }
+    ctx.lineTo(W, H);
+    ctx.closePath();
+    ctx.fillStyle = c.cor;
+    ctx.fill();
+  }
+  const span = 14 * 190;
+  for (let i = 0; i < 14; i++) {
+    const x = (((i * 190 - camX * 0.35) % span) + span) % span - 40;
+    const h = 70 + ((i * 53) % 90);
+    rr(x, 430 - h, 26, h, 3, '#1f1734');
+    ctx.fillStyle = '#86dcb9';
+    ctx.globalAlpha = 0.5 + 0.5 * Math.sin(frame * 0.07 + i);
+    ctx.fillRect(x + 8, 430 - h + 12, 4, 4);
+    ctx.globalAlpha = 1;
+  }
+  for (let i = 0; i < 22; i++) {
+    const x = (i * 137 + frame * (0.2 + (i % 3) * 0.1)) % W;
+    const y = (i * 73 + frame * 0.15) % H;
+    ctx.globalAlpha = 0.25;
+    circ(x, y, 1.3, '#c4b5fd');
+  }
+  ctx.globalAlpha = 1;
+}
+
+function desenharPlataforma(s) {
+  if (s.chao) {
+    ctx.fillStyle = grad(0, s.y, 0, H, [[0, '#3a2f4d'], [0.25, '#2a2236'], [1, '#17121f']]);
+    ctx.fillRect(s.x, s.y + 6, s.w, H - s.y);
+    for (let x = s.x + 10; x < s.x + s.w; x += 34) {
+      circ(x + ((x * 7) % 9), s.y + 30 + ((x * 5) % 20), 3, 'rgba(255,255,255,.06)');
+    }
+    ctx.fillStyle = grad(0, s.y, 0, s.y + 14, [[0, '#a7f3d0'], [1, '#3f9c7a']]);
+    ctx.fillRect(s.x, s.y, s.w, 8);
+    ctx.fillStyle = '#86dcb9';
+    for (let x = s.x + 4; x < s.x + s.w; x += 12) {
+      ctx.beginPath(); ctx.moveTo(x, s.y); ctx.lineTo(x + 2, s.y - 4); ctx.lineTo(x + 4, s.y); ctx.fill();
+    }
+    ctx.fillStyle = 'rgba(255,255,255,.25)';
+    ctx.fillRect(s.x, s.y, s.w, 2);
+    return;
+  }
+  ctx.fillStyle = 'rgba(0,0,0,.35)';
+  caminhoRR(s.x + 2, s.y + s.h, s.w - 4, 6, 3);
+  ctx.fill();
+  const mov = s.mov;
+  rr(s.x, s.y, s.w, s.h, 7,
+    grad(0, s.y, 0, s.y + s.h, mov ? [[0, '#7a5a2c'], [1, '#4a3418']] : [[0, '#5a4a86'], [1, '#2e2448']]),
+    CONTORNO, 1.5);
+  rr(s.x + 3, s.y + 2, s.w - 6, 4, 2, mov ? '#f8d98a' : '#a7f3d0');
+  for (let x = s.x + 8; x < s.x + s.w - 6; x += 24) circ(x, s.y + s.h / 2, 1.8, 'rgba(20,15,31,.6)');
+  if (mov) {
+    ctx.save();
+    caminhoRR(s.x, s.y, s.w, s.h, 7);
+    ctx.clip();
+    ctx.fillStyle = 'rgba(245,199,107,.55)';
+    for (let x = s.x - s.h + ((frame * 0.6) % 16); x < s.x + s.w; x += 16) {
+      ctx.beginPath();
+      ctx.moveTo(x, s.y + s.h); ctx.lineTo(x + 8, s.y + s.h);
+      ctx.lineTo(x + s.h + 8, s.y); ctx.lineTo(x + s.h, s.y);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+}
+
+function desenharDestinatario() {
+  const mx = fase.meta;
+  rr(mx + 10, GROUND - 156, 10, 156, 4, grad(mx + 10, 0, mx + 20, 0, [[0, '#f0eaff'], [1, '#8e84a3']]), CONTORNO, 1.2);
+  rr(mx + 4, GROUND - 10, 22, 10, 3, '#5e5673', CONTORNO, 1);
+  const w = 34, h = 22, x0 = mx + 20, y0 = GROUND - 150;
+  ctx.beginPath();
+  ctx.moveTo(x0, y0);
+  for (let t = 0; t <= w; t += 2) ctx.lineTo(x0 + t, y0 + Math.sin(t * 0.25 + frame * 0.12) * 2);
+  ctx.lineTo(x0 + w, y0 + h);
+  for (let t = w; t >= 0; t -= 2) ctx.lineTo(x0 + t, y0 + h + Math.sin(t * 0.25 + frame * 0.12) * 2);
+  ctx.closePath();
+  ctx.fillStyle = grad(x0, y0, x0, y0 + h, [[0, '#b6f5dc'], [1, '#4fae8a']]);
+  ctx.fill();
+  ctx.strokeStyle = CONTORNO; ctx.lineWidth = 1.2; ctx.stroke();
+  rotuloCanvas('Destinatário', mx + 15, GROUND - 172, '#d8d0e6');
+}
+
+function desenharPortao() {
+  const gx = fase.meta, aberto = st.chave;
+  for (const px0 of [gx, gx + 52]) {
+    rr(px0 - 4, GROUND - 170, 12, 170, 3, grad(px0, 0, px0 + 12, 0, [[0, '#b2a8c8'], [1, '#6b6184']]), CONTORNO, 1.4);
+  }
+  rr(gx - 10, GROUND - 184, 80, 16, 5, grad(0, GROUND - 184, 0, GROUND - 168, [[0, '#c9bfe0'], [1, '#7b7196']]), CONTORNO, 1.4);
+  if (aberto) {
+    ctx.fillStyle = gradR(gx + 26, GROUND - 90, 4, 90, [[0, 'rgba(134,220,185,.6)'], [1, 'rgba(134,220,185,0)']]);
+    ctx.fillRect(gx + 4, GROUND - 170, 44, 170);
+  } else {
+    rr(gx + 6, GROUND - 160, 40, 160, 4, grad(0, GROUND - 160, 0, GROUND, [[0, '#4a3a6c'], [1, '#2a2038']]), CONTORNO, 1.4);
+    for (let y = GROUND - 150; y < GROUND; y += 20) { ctx.fillStyle = 'rgba(20,12,28,.45)'; ctx.fillRect(gx + 8, y, 36, 2); }
+    rr(gx + 21, GROUND - 98, 10, 9, 2, '#f5c76b', CONTORNO, 1.2);
+    ctx.beginPath(); ctx.arc(gx + 26, GROUND - 100, 4, Math.PI, 0);
+    ctx.strokeStyle = '#f5c76b'; ctx.lineWidth = 2.4; ctx.stroke();
+    circ(gx + 26, GROUND - 93, 1.4, '#3a2a10');
+  }
+  rotuloCanvas(aberto ? 'Portão aberto' : 'Trancado', gx + 26, GROUND - 198, aberto ? '#86dcb9' : '#f5c76b');
+}
+
+/* ===== objetos coletáveis e inimigos ===== */
+function desenharCarta(c, i) {
+  if (c.pego) return;
+  const x = c.x + 11, y = c.y + 11 + Math.sin(frame * 0.08 + i) * 2;
+  ctx.globalAlpha = 0.35 + 0.15 * Math.sin(frame * 0.1 + i);
+  ctx.fillStyle = gradR(x, y, 4, 24, [[0, 'rgba(167,139,250,.9)'], [1, 'rgba(167,139,250,0)']]);
+  ctx.fillRect(x - 24, y - 24, 48, 48);
+  ctx.globalAlpha = 1;
+  rr(x - 11, y - 8, 22, 16, 3, grad(x - 11, y - 8, x + 11, y + 8, [[0, '#f5f0ff'], [1, '#c4b5fd']]), '#4c3a80', 1);
+  ctx.strokeStyle = '#7c5ce0'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(x - 11, y - 8); ctx.lineTo(x, y + 1); ctx.lineTo(x + 11, y - 8); ctx.stroke();
+}
+
+function desenharMoeda(m, i) {
+  if (m.pego) return;
+  const cx = m.x + 4, cy = m.y + 7 + Math.sin(frame * 0.1 + i) * 2;
+  const sx = Math.max(0.15, Math.abs(Math.sin(frame * 0.08 + i)));
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.scale(sx, 1);
+  circ(0, 0, 8, '#b07a1a');
+  circ(0, 0, 7, gradR(-2, -2, 1, 8, [[0, '#fff3c4'], [0.5, '#f5c76b'], [1, '#c98a24']]), '#7a5012', 1);
+  circ(0, 0, 4.5, null, 'rgba(120,80,20,.5)', 1);
+  ctx.restore();
+}
+
+function desenharRuido(e, k) {
+  if (e.sumiu) return;
+  const cx = e.x + e.w / 2, base = e.y + e.h;
+  if (e.morto > 0) {
+    ctx.globalAlpha = e.morto / 24;
+    ctx.fillStyle = '#f4937a';
+    ctx.beginPath(); ctx.ellipse(cx, base - 4, 16, 4, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.globalAlpha = 1;
+    return;
+  }
+  const t = frame * 0.2 + k;
+  ctx.fillStyle = 'rgba(0,0,0,.35)';
+  ctx.beginPath(); ctx.ellipse(cx, base + 2, 14, 4, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath();
+  const N = 10, r0 = 13, r1 = 17;
+  for (let j = 0; j <= N * 2; j++) {
+    const a = (j / (N * 2)) * Math.PI * 2 - Math.PI / 2;
+    const r = j % 2 === 0 ? r0 : r1 + Math.sin(t + j) * 1.2;
+    const x = cx + Math.cos(a) * r * 1.05, y = base - 14 + Math.sin(a) * r * 0.95;
+    if (j === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  }
+  ctx.closePath();
+  ctx.fillStyle = gradR(cx - 4, base - 20, 2, 20, [[0, '#ffb4a2'], [1, '#c4553d']]);
+  ctx.fill();
+  ctx.lineWidth = 1.5; ctx.strokeStyle = '#3a1a14'; ctx.stroke();
+  for (const ox of [-5, 5]) {
+    circ(cx + ox, base - 17, 4, '#ffffff', '#3a1a14', 1);
+    circ(cx + ox + (e.dir > 0 ? 1 : -1), base - 17, 2, '#1d1727');
+  }
+  ctx.beginPath(); ctx.arc(cx, base - 10, 4, 0.1, Math.PI - 0.1);
+  ctx.strokeStyle = '#3a1a14'; ctx.lineWidth = 1.5; ctx.stroke();
+}
+
+function desenharBoss(n) {
+  if (n.derrotado) return;
+  const bm = bossMorte && bossMorte.boss === n ? bossMorte : null;
+  if (bm && bm.t >= 95) return;
+  const base = GROUND, R = 30;
+  const cx = n.x + 36;
+  let cy = base - 36 + Math.sin(frame * 0.08) * 3;
+  let escala = 1, ox = 0, oy = 0;
+  if (bm) {
+    const t = bm.t;
+    ox = Math.sin(t * 1.9) * (t / 25);
+    oy = Math.cos(t * 2.3) * (t / 35);
+    escala = 1 + Math.max(0, t - 55) / 110;
+  }
+  ctx.fillStyle = 'rgba(0,0,0,.35)';
+  ctx.beginPath(); ctx.ellipse(cx, base + 2, 32, 6, 0, 0, Math.PI * 2); ctx.fill();
+
+  ctx.save();
+  ctx.translate(cx + ox, cy + oy);
+  ctx.scale(escala, escala);
+  for (let i = 0; i < 8; i++) {
+    const a = (i / 8) * Math.PI * 2 + frame * 0.01;
+    const x1 = Math.cos(a) * R, y1 = Math.sin(a) * R;
+    const x2 = Math.cos(a) * (R + 12), y2 = Math.sin(a) * (R + 12);
+    ctx.beginPath();
+    ctx.moveTo(x1 - Math.sin(a) * 6, y1 + Math.cos(a) * 6);
+    ctx.lineTo(x2, y2);
+    ctx.lineTo(x1 + Math.sin(a) * 6, y1 - Math.cos(a) * 6);
+    ctx.closePath();
+    ctx.fillStyle = '#e0715c'; ctx.fill();
+    ctx.strokeStyle = CONTORNO; ctx.lineWidth = 1.2; ctx.stroke();
+  }
+  circ(0, 0, R, gradR(-8, -10, 4, R + 4, [[0, '#ff9a85'], [0.6, '#c4553d'], [1, '#7a2a20']]), CONTORNO, 2);
+  for (const dx of [-11, 11]) {
+    circ(dx, -6, 8.5, '#f4eff8', CONTORNO, 1.2);
+    circ(dx + Math.sin(frame * 0.05) * 2, -5, 4, '#1b1320');
+    circ(dx - 2, -8, 1.5, '#ffffff');
+  }
+  ctx.beginPath();
+  ctx.moveTo(-20, -18); ctx.lineTo(-4, -13);
+  ctx.moveTo(20, -18); ctx.lineTo(4, -13);
+  ctx.strokeStyle = '#3a1a14'; ctx.lineWidth = 2.5; ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(-12, 12);
+  for (let k = 0; k <= 6; k++) ctx.lineTo(-12 + k * 4, 12 + (k % 2 ? 5 : 0));
+  ctx.lineTo(12, 12);
+  ctx.closePath();
+  ctx.fillStyle = '#3a1a14'; ctx.fill();
+  if (bm && bm.t > 20) {
+    ctx.strokeStyle = '#ffd9c9'; ctx.lineWidth = 2;
+    const len = Math.min(60, (bm.t - 20) * 0.9);
+    for (let k = 0; k < 6; k++) {
+      const a = k * 1.05 + 0.4;
+      ctx.beginPath();
+      ctx.moveTo(Math.cos(a) * 8, Math.sin(a) * 8);
+      ctx.lineTo(Math.cos(a) * len * 0.5 + 3, Math.sin(a) * len * 0.5 - 2);
+      ctx.lineTo(Math.cos(a) * len, Math.sin(a) * len);
+      ctx.stroke();
+    }
+  }
+  if (bm && bm.t % 12 < 3) circ(0, 0, R + 6, 'rgba(255,255,255,.35)');
+  ctx.restore();
+  rotuloCanvas(n.nome, cx + ox, base - 96, '#f4937a');
+}
+
+/* ===== personagens ===== */
+function desenharPersonagem(cx, base, cor, f, andando, fr, pulando, pisc, pose = {}) {
+  if (pisc && Math.floor(fr / 4) % 2 === 0) return;
+  const pele = cor.pele || '#8a5a44';
+  const passo = andando ? Math.sin(fr * 0.4) * 3.2 : 0;
+  const bal = andando ? Math.sin(fr * 0.4 + Math.PI) * 4 : 0;
+  const braco = pose.subindo ? -7 : pose.caindo ? 2 : 0;
+  const piscando = fr % 170 < 6;
+
+  ctx.fillStyle = 'rgba(0,0,0,.35)';
+  ctx.beginPath(); ctx.ellipse(cx, base + 1, 11, 3.2, 0, 0, Math.PI * 2); ctx.fill();
+
+  const pernaY = pulando ? base - 9 : base - 14;
+  const altPerna = pulando ? 9 : 14;
+  rr(cx - 6 + passo, pernaY, 5.5, altPerna, 2, cor.calca, CONTORNO, 1.2);
+  rr(cx + 0.5 - passo, pernaY, 5.5, altPerna, 2, cor.calca, CONTORNO, 1.2);
+  rr(cx - 7 + passo, base - 2, 7, 3, 1.5, '#f4eff8', CONTORNO, 1);
+  rr(cx - passo, base - 2, 7, 3, 1.5, '#f4eff8', CONTORNO, 1);
+
+  rr(cx - 11, base - 25 + bal + braco, 4.5, 12, 2.2, tom(cor.roupa, -0.15), CONTORNO, 1.2);
+  rr(cx + 7, base - 25 - bal + braco, 4.5, 12, 2.2, tom(cor.roupa, -0.15), CONTORNO, 1.2);
+  rr(cx - 9, base - 27, 18, 16, 5, grad(0, base - 27, 0, base - 11, [[0, cor.roupa], [1, tom(cor.roupa, -0.35)]]), CONTORNO, 1.4);
+  ctx.beginPath();
+  ctx.moveTo(cx - 4, base - 27); ctx.lineTo(cx, base - 22); ctx.lineTo(cx + 4, base - 27); ctx.closePath();
+  ctx.fillStyle = '#f4937a'; ctx.fill();
+
+  /* cabeça */
+  circ(cx, base - 33, 9.5, grad(cx - 6, base - 40, cx + 6, base - 26, [[0, tom(pele, 0.12)], [1, pele]]), CONTORNO, 1.4);
+  /* cabelo: calota acima dos olhos */
+  ctx.beginPath();
+  ctx.ellipse(cx, base - 36.5, 10.2, 7.2, 0, Math.PI, Math.PI * 2);
+  ctx.closePath();
+  ctx.fillStyle = cor.cabelo; ctx.fill();
+  ctx.lineWidth = 1.2; ctx.strokeStyle = CONTORNO; ctx.stroke();
+  /* franja curta */
+  ctx.beginPath();
+  ctx.moveTo(cx - 9.5, base - 36.5);
+  ctx.quadraticCurveTo(cx - 4, base - 34, cx + 1, base - 36.5);
+  ctx.quadraticCurveTo(cx + 6, base - 38, cx + 9.5, base - 36.5);
+  ctx.lineTo(cx + 9.5, base - 35.5);
+  ctx.quadraticCurveTo(cx, base - 34.5, cx - 9.5, base - 35.5);
+  ctx.closePath();
+  ctx.fillStyle = cor.cabelo; ctx.fill();
+  /* fone de ouvido acima do cabelo */
+  ctx.beginPath(); ctx.arc(cx, base - 34.5, 12, Math.PI * 1.05, Math.PI * 1.95);
+  ctx.lineWidth = 2.4; ctx.strokeStyle = cor.detalhe; ctx.stroke();
+  rr(cx - 14, base - 38, 4.5, 8.5, 2, cor.detalhe, CONTORNO, 1);
+  rr(cx + 9.5, base - 38, 4.5, 8.5, 2, cor.detalhe, CONTORNO, 1);
+  /* microfone do lado de fora do rosto */
+  ctx.beginPath(); ctx.moveTo(cx - 12, base - 30);
+  ctx.quadraticCurveTo(cx - 13, base - 22, cx - 7, base - 22);
+  ctx.strokeStyle = cor.detalhe; ctx.lineWidth = 1.6; ctx.stroke();
+  circ(cx - 7, base - 22, 1.8, '#f4937a');
+  /* olhos */
+  for (const dx of [-3.6, 3.6]) {
+    const x = cx + dx + f * 0.8;
+    if (piscando) {
+      ctx.strokeStyle = '#1b1320'; ctx.lineWidth = 1.3;
+      ctx.beginPath(); ctx.moveTo(x - 1.8, base - 32); ctx.lineTo(x + 1.8, base - 32); ctx.stroke();
+    } else {
+      circ(x, base - 32, 1.9, '#1b1320');
+      circ(x + 0.6, base - 32.7, 0.65, '#ffffff');
+    }
+  }
+  /* bochechas, nariz e sorriso */
+  circ(cx - 5.8, base - 28.5, 1.9, 'rgba(244,147,122,.5)');
+  circ(cx + 5.8, base - 28.5, 1.9, 'rgba(244,147,122,.5)');
+  circ(cx + f * 0.8, base - 30.2, 0.9, tom(pele, -0.25));
+  ctx.beginPath(); ctx.arc(cx + f * 0.6, base - 27.8, 2.4, 0.25, Math.PI - 0.25);
+  ctx.strokeStyle = '#3a1f18'; ctx.lineWidth = 1.2; ctx.stroke();
+}
+
+function desenharJogador() {
+  const andando = p.onGround && Math.abs(p.vx) > 0.5;
+  const pose = { subindo: !p.onGround && p.vy < -1, caindo: !p.onGround && p.vy > 1 };
+  if (landT > 0) landT--;
+  ctx.save();
+  if (landT > 0) {
+    const k = landT / 8, bx = p.x + p.w / 2, by = p.y + p.h;
+    ctx.translate(bx, by);
+    ctx.scale(1 + 0.18 * k, 1 - 0.18 * k);
+    ctx.translate(-bx, -by);
+  }
+  desenharPersonagem(p.x + p.w / 2, p.y + p.h, CORES_JOGADOR, p.facing, andando, frame, !p.onGround, invul > 0, pose);
+  ctx.restore();
+}
+
+/* ===== poeira ao pousar ===== */
+function spawnPoeira(x, y) {
+  for (let i = 0; i < 6; i++) poeira.push({ x, y, vx: (Math.random() - 0.5) * 2.4, vy: -Math.random() * 1.2, life: 20 });
+}
+function desenharPoeira() {
+  for (const q of poeira) {
+    q.x += q.vx; q.y += q.vy; q.vy += 0.05; q.life--;
+    ctx.globalAlpha = Math.max(0, q.life / 20) * 0.7;
+    circ(q.x, q.y, 2.2, '#d8d0e6');
+  }
+  ctx.globalAlpha = 1;
+  poeira = poeira.filter(q => q.life > 0);
+}
+
+function desenharNpc(n) {
+  const cx = n.x + 12;
+  desenharPersonagem(cx, GROUND, n.cor, 1, false, frame, false, false);
+  rotuloCanvas(n.nome, cx, GROUND - 56, '#d8d0e6');
+}
+
+function desenharIndicador(n) {
+  const cx = n.x + (n.boss ? 36 : 12);
+  const y = GROUND - (n.boss ? 118 : 74) + Math.sin(frame * 0.12) * 2;
+  rr(cx - 30, y - 11, 60, 22, 11, '#86dcb9');
+  ctx.fillStyle = '#0d2a1f';
+  ctx.font = 'bold 11px system-ui, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('E · falar', cx, y);
+}
+
+/* ===== desenho dos inimigos ===== */
+function desenharSombra(cx, base, rx) {
+  ctx.fillStyle = 'rgba(0,0,0,.3)';
+  ctx.beginPath(); ctx.ellipse(cx, base + 2, rx, 4, 0, 0, Math.PI * 2); ctx.fill();
+}
+function desenharInterf(cx, base, t) {
+  desenharSombra(cx, base, 14);
+  const j = Math.sin(t * 2) * 1.2;
+  for (const [dx, dy, r] of [[-7, -12, 9], [6, -16, 10], [0, -8, 8]]) circ(cx + dx, base + dy + j * 0.3, r, 'rgba(125,211,252,.82)', '#1f4a66', 1.2);
+  ctx.strokeStyle = '#e0f7ff'; ctx.lineWidth = 1.5;
+  const zx = cx + Math.sin(t * 3) * 3;
+  ctx.beginPath();
+  ctx.moveTo(zx, base - 24); ctx.lineTo(zx + 3, base - 18); ctx.lineTo(zx - 1, base - 17); ctx.lineTo(zx + 2, base - 10);
+  ctx.stroke();
+}
+function desenharAtraso(cx, base, t) {
+  desenharSombra(cx, base, 15);
+  rr(cx - 14, base - 28, 28, 26, 6, '#241b38', '#a78bfa', 1.8);
+  for (let y = base - 26; y < base - 4; y += 4) { ctx.fillStyle = 'rgba(167,139,250,.12)'; ctx.fillRect(cx - 12, y, 24, 2); }
+  const a = t * 0.5;
+  ctx.strokeStyle = '#c4b5fd'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(cx, base - 15); ctx.lineTo(cx + Math.cos(a) * 7, base - 15 + Math.sin(a) * 7); ctx.stroke();
+  circ(cx, base - 15, 1.5, '#c4b5fd');
+}
+function desenharSpam(cx, base, t) {
+  desenharSombra(cx, base, 7);
+  const bob = Math.abs(Math.sin(t)) * 3;
+  rr(cx - 8, base - 14 - bob, 16, 12, 2, '#f5f0ff', '#f4937a', 1.2);
+  ctx.beginPath(); ctx.moveTo(cx - 8, base - 14 - bob); ctx.lineTo(cx, base - 8 - bob); ctx.lineTo(cx + 8, base - 14 - bob);
+  ctx.strokeStyle = '#f4937a'; ctx.lineWidth = 1; ctx.stroke();
+  circ(cx - 3, base - 10 - bob, 1, '#1d1727');
+  circ(cx + 3, base - 10 - bob, 1, '#1d1727');
+}
+function desenharEco(cx, base, t, e) {
+  desenharSombra(cx, base, 12);
+  const flut = Math.sin(t) * 2;
+  for (let i = 1; i <= 2; i++) {
+    ctx.globalAlpha = 0.22 - i * 0.07;
+    circ(cx - Math.sign(e.x - (e.trilhaX ?? e.x)) * i * 9 - (i * 8), base - 22 + flut, 10, '#c4b5fd');
+  }
+  ctx.globalAlpha = 0.65;
+  circ(cx, base - 22 + flut, 11, gradR(cx - 3, base - 26, 2, 11, [[0, '#e9d5ff'], [1, '#7c5ce0']]), '#c4b5fd', 1.5);
+  rr(cx - 9, base - 14 + flut, 18, 14, 6, 'rgba(124,92,224,.7)', '#c4b5fd', 1.2);
+  circ(cx - 4, base - 23 + flut, 1.6, '#1b1320');
+  circ(cx + 4, base - 23 + flut, 1.6, '#1b1320');
+}
+function desenharInimigo(e, k) {
+  if (e.sumiu) return;
+  if (e.morto > 0) { desenharMorteInimigo(e); return; }
+  const oculto = e.tipo === 'atraso' && Math.floor(frame / 120) % 2 === 1;
+  if (oculto) ctx.globalAlpha = 0.22;
+  const cx = e.x + e.w / 2, base = e.y + e.h, t = frame * 0.15 + k;
+  switch (e.tipo) {
+    case 'interf': desenharInterf(cx, base, t); break;
+    case 'atraso': desenharAtraso(cx, base, t); break;
+    case 'spam': desenharSpam(cx, base, t); break;
+    case 'eco': desenharEco(cx, base, t, e); break;
+    default: desenharRuido(e, k);
+  }
+  ctx.globalAlpha = 1;
+}
+/* ===== animação de morte: cada inimigo tem a sua (40 quadros) ===== */
+function desenharMorteInimigo(e) {
+  const t = 1 - e.morto / 40;
+  const a = Math.max(0, 1 - t);
+  const cx = e.x + e.w / 2, base = e.y + e.h;
+  ctx.save();
+  switch (e.tipo) {
+    case 'interf': {
+      for (let r = 0; r < 3; r++) {
+        ctx.globalAlpha = Math.max(0, a - r * 0.2);
+        circ(cx, base - 14, 6 + t * 26 + r * 5, null, '#7dd3fc', 2);
+      }
+      for (let i = 0; i < 10; i++) {
+        const an = i * 0.63, d = t * 40 * (0.6 + (i % 3) * 0.25);
+        ctx.globalAlpha = a;
+        ctx.fillStyle = '#e0f7ff';
+        ctx.fillRect(cx + Math.cos(an) * d - 1.5, base - 14 + Math.sin(an) * d * 0.6 - 1.5, 3, 3);
+      }
+      break;
+    }
+    case 'atraso': {
+      for (let i = 0; i < 6; i++) {
+        const sh = Math.sin(i * 2.3 + t * 20) * t * 18;
+        ctx.globalAlpha = a;
+        ctx.fillStyle = '#241b38';
+        ctx.fillRect(cx - 14 + sh, base - 28 + i * 4.33, 28, 4.33);
+        ctx.fillStyle = '#a78bfa';
+        ctx.fillRect(cx - 14 + sh, base - 28 + i * 4.33, 28, 1);
+      }
+      break;
+    }
+    case 'spam': {
+      const y = base - 14 - t * 30;
+      ctx.globalAlpha = a;
+      rr(cx - 8, y, 16, 12, 2, '#f5f0ff', '#f4937a', 1);
+      for (let i = 0; i < 5; i++) {
+        const an = i * 1.3, d = t * 20;
+        ctx.globalAlpha = a;
+        ctx.fillStyle = '#f5f0ff';
+        ctx.fillRect(cx + Math.cos(an) * d - 2, y + Math.sin(an) * d * 0.5 + t * 8 * i * 0.2, 4, 3);
+      }
+      break;
+    }
+    case 'eco': {
+      for (let r = 0; r < 3; r++) {
+        ctx.globalAlpha = Math.max(0, a - r * 0.25);
+        circ(cx, base - 22, t * 30 + r * 8, null, '#c4b5fd', 2);
+      }
+      ctx.globalAlpha = a * 0.6;
+      circ(cx, base - 22, 11 * (1 - t * 0.6), '#7c5ce0');
+      break;
+    }
+    default: {
+      for (let i = 0; i < 8; i++) {
+        const an = (i / 8) * Math.PI * 2, d = t * 26;
+        ctx.globalAlpha = a;
+        circ(cx + Math.cos(an) * d, base - 14 + Math.sin(an) * d * 0.7, 3 * (1 - t) + 1, '#f4937a');
+      }
+      ctx.globalAlpha = a;
+      circ(cx, base - 14, Math.max(1, 14 * (1 - t)), '#f4937a');
+    }
+  }
+  ctx.restore();
+}
+
+/* ===== efeito visual de cada dano sofrido (50 quadros) ===== */
+let efeitoDano = null;
+function iniciarEfeitoDano(tipo) { efeitoDano = { tipo, t: 0, dur: 50 }; }
+
+function desenharEfeitoDano() {
+  if (!efeitoDano) return;
+  const ef = efeitoDano;
+  ef.t++;
+  if (ef.t >= ef.dur) { efeitoDano = null; return; }
+  const t = ef.t / ef.dur, a = 1 - t;
+  const cx = p.x + p.w / 2, base = p.y + p.h, top = base - 38;
+  ctx.save();
+  switch (ef.tipo) {
+    case 'interf': {
+      for (let i = 0; i < 6; i++) {
+        const y = top + ((i * 37 + ef.t * 9) % 44);
+        ctx.globalAlpha = a * 0.8;
+        ctx.fillStyle = i % 2 ? 'rgba(125,211,252,.9)' : 'rgba(255,255,255,.7)';
+        ctx.fillRect(cx - 22 + ((ef.t * 7 + i * 5) % 6) - 3, y, 44, 2);
+      }
+      break;
+    }
+    case 'atraso': {
+      for (let i = 1; i <= 3; i++) {
+        ctx.globalAlpha = (a * 0.4) / i;
+        ctx.strokeStyle = '#a78bfa'; ctx.lineWidth = 2;
+        caminhoRR(cx - 13 - i * 9, top + 4, 26, 34, 6);
+        ctx.stroke();
+      }
+      break;
+    }
+    case 'spam': {
+      for (let i = 0; i < 6; i++) {
+        const x = cx - 30 + i * 12 + Math.sin(i) * 4;
+        const y = top - 20 + ((ef.t * 3 + i * 11) % 70);
+        ctx.globalAlpha = a;
+        rr(x, y, 10, 7, 1, '#f5f0ff', '#f4937a', 0.8);
+      }
+      break;
+    }
+    case 'eco': {
+      for (let r = 0; r < 3; r++) {
+        ctx.globalAlpha = Math.max(0, a - r * 0.25);
+        circ(cx, base - 19, 10 + t * 40 + r * 10, null, '#c4b5fd', 2);
+      }
+      break;
+    }
+    case 'buraco': {
+      ctx.globalAlpha = a * 0.6;
+      ctx.fillStyle = grad(0, base - 300, 0, base, [[0, 'rgba(134,220,185,0)'], [1, 'rgba(134,220,185,.9)']]);
+      ctx.fillRect(cx - 10, base - 300, 20, 300);
+      ctx.globalAlpha = a;
+      circ(cx, base, 8 + t * 30, null, '#86dcb9', 2);
+      break;
+    }
+    default: {
+      for (let i = 0; i < 8; i++) {
+        const an = (i / 8) * Math.PI * 2, d = 8 + t * 26;
+        ctx.globalAlpha = a;
+        ctx.fillStyle = '#f4937a';
+        ctx.fillRect(cx + Math.cos(an) * d - 1.5, base - 19 + Math.sin(an) * d - 1.5, 3, 3);
+      }
+    }
+  }
+  ctx.restore();
+}
+
+/* ===== fragmentos e onda da explosão ===== */
+function desenharMorte() {
+  if (!bossMorte || bossMorte.t < 95) return;
+  const bm = bossMorte, t = bm.t;
+  const cx = bm.boss.x + 36, cy = GROUND - 36;
+  const fade = Math.max(0, 1 - (t - 95) / 130);
+  ctx.globalAlpha = fade;
+  for (const pc of bm.pecas) {
+    ctx.save();
+    ctx.translate(pc.x, pc.y);
+    ctx.rotate(pc.rot);
+    ctx.fillStyle = pc.cor; ctx.strokeStyle = CONTORNO; ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(0, -pc.r); ctx.lineTo(pc.r * 0.8, pc.r * 0.6); ctx.lineTo(-pc.r * 0.7, pc.r * 0.5);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.restore();
+  }
+  for (let i = 0; i < 14; i++) {
+    const a = i * 0.45 + t * 0.05;
+    const d = (t - 95) * (2 + (i % 3));
+    ctx.globalAlpha = Math.max(0, 1 - (t - 95) / 80);
+    circ(cx + Math.cos(a) * d, cy + Math.sin(a) * d * 0.6, 2.2, '#fde68a');
+  }
+  ctx.globalAlpha = 1;
+  if (t < 150) {
+    ctx.globalAlpha = Math.max(0, 1 - (t - 95) / 55);
+    circ(cx, cy, (t - 95) * 8, null, '#86dcb9', 4);
+    ctx.globalAlpha = 1;
+  }
+}
+
+/* ===== quadro completo ===== */
+function desenhar() {
+  ctx.setTransform(K, 0, 0, K, 0, 0);
+  desenharCeu();
+  desenharFundoParalaxe();
+
+  ctx.setTransform(K * ZOOM, 0, 0, K * ZOOM, 0, 0);
+  let tremX = 0, tremY = 0;
+  if (bossMorte) {
+    const t = bossMorte.t;
+    const amp = t < 95 ? t / 22 : Math.max(0, (140 - t) / 6);
+    tremX = Math.sin(t * 1.7) * amp;
+    tremY = Math.cos(t * 2.1) * amp * 0.6;
+  }
+  ctx.translate(-Math.round(camX) + tremX, -Math.round(camY) + tremY);
+  for (const s of solidos) desenharPlataforma(s);
+  if (fase.portao) desenharPortao(); else desenharDestinatario();
+  pacotes.forEach((c, i) => desenharCarta(c, i));
+  moedasFase.forEach((m, i) => desenharMoeda(m, i));
+  inimigos.forEach((e, k) => desenharInimigo(e, k));
+  npcs.forEach(n => { if (n.boss) desenharBoss(n); else desenharNpc(n); });
+  desenharMorte();
+  const prox = npcProximo();
+  if (prox && estado === 'jogando' && !enigmaAberto && !bossMorte) desenharIndicador(prox);
+  desenharJogador();
+  desenharPoeira();
+  desenharEfeitoDano();
+
+  ctx.setTransform(K, 0, 0, K, 0, 0);
+  desenharFrente();
+  ctx.fillStyle = gradR(W / 2, H / 2, H * 0.35, H * 0.85, [[0, 'rgba(0,0,0,0)'], [1, 'rgba(5,3,10,.55)']]);
+  ctx.fillRect(0, 0, W, H);
+  if (flashMorte > 0) {
+    ctx.fillStyle = `rgba(255,255,255,${(flashMorte * 0.8).toFixed(3)})`;
+    ctx.fillRect(0, 0, W, H);
+  }
+}
+
+/* ===== entrada: teclado e toque ===== */
+function mapear(tecla, v) {
+  if (tecla === 'ArrowLeft' || tecla === 'a' || tecla === 'A') teclas.esq = v;
+  if (tecla === 'ArrowRight' || tecla === 'd' || tecla === 'D') teclas.dir = v;
+  if (tecla === ' ' || tecla === 'ArrowUp' || tecla === 'w' || tecla === 'W') teclas.pulo = v;
+  if (tecla === 'e' || tecla === 'E' || tecla === 'Enter') teclas.falar = v;
+}
+document.addEventListener('keydown', e => {
+  if (enigmaAberto) return;
+  if (['ArrowLeft', 'ArrowRight', 'ArrowUp', ' ', 'a', 'd', 'w', 'A', 'D', 'W'].includes(e.key)) e.preventDefault();
+  mapear(e.key, true);
+});
+document.addEventListener('keyup', e => mapear(e.key, false));
+window.addEventListener('blur', () => { teclas.esq = teclas.dir = teclas.pulo = teclas.falar = false; });
+
+document.querySelectorAll('.tbtn[data-tecla], #btnFalar').forEach(b => {
+  const chave = b.id === 'btnFalar' ? 'falar' : b.dataset.tecla;
+  const definir = v => { teclas[chave] = v; b.classList.toggle('ativo', v); };
+  b.addEventListener('pointerdown', e => { e.preventDefault(); b.setPointerCapture(e.pointerId); definir(true); });
+  ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(ev => b.addEventListener(ev, () => definir(false)));
+});
+
+document.addEventListener('pointerdown', () => { telaCheia(); }, { once: true });
+
+/* ===== enigma ===== */
+document.getElementById('btnDecifrar').addEventListener('click', tentarDecifrar);
+document.getElementById('resp').addEventListener('keydown', e => { if (e.key === 'Enter') tentarDecifrar(); });
+document.getElementById('btnFecharEnigma').addEventListener('click', fecharEnigma);
+
+/* ===== botões das telas ===== */
+document.getElementById('btnRetry').addEventListener('click', () => { vidas = 3; pulsoAnt = false; iniciar(faseIdx); });
+document.getElementById('btnAgain').addEventListener('click', () => { novaPartida(); });
+
+/* ===== laço principal ===== */
+function laco() {
+  frame++;
+  atualizarMorteBoss();
+  if (estado === 'jogando' && !faseTerminada && !enigmaAberto && !bossMorte) atualizar();
+  const prox = estado === 'jogando' ? npcProximo() : null;
+  document.getElementById('btnFalar').hidden = !(prox || conversa);
+  desenhar();
+  requestAnimationFrame(laco);
+}
+
+function fimDeVidas() {
+  gameOver();
+}
+
+/* ===== sons sintetizados pelo navegador (sem arquivos externos) ===== */
+let audioCtx = null, somLigado = false;
+function garantirAudio() {
+  if (!audioCtx) {
+    try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return; }
+  }
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+}
+const numOk = (v, padrao) => (Number.isFinite(v) ? v : padrao);
+function tom(freq, dur, tipo = 'sine', vol = 0.12, quando = 0, deslize = 0) {
+  if (!audioCtx || !somLigado) return;
+  freq = numOk(freq, 440); dur = numOk(dur, 0.2); vol = numOk(vol, 0.1);
+  quando = numOk(quando, 0); deslize = numOk(deslize, 0);
+  try {
+    const t0 = audioCtx.currentTime + quando;
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.type = tipo;
+    o.frequency.setValueAtTime(freq, t0);
+    if (deslize) o.frequency.exponentialRampToValueAtTime(Math.max(40, freq + deslize), t0 + dur);
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(vol, t0 + 0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    o.connect(g).connect(audioCtx.destination);
+    o.start(t0);
+    o.stop(t0 + dur + 0.03);
+  } catch (e) { /* som com problema não deve travar o jogo */ }
+}
+function ruido(dur, vol = 0.1, quando = 0) {
+  if (!audioCtx || !somLigado) return;
+  dur = numOk(dur, 0.1); vol = numOk(vol, 0.1); quando = numOk(quando, 0);
+  const n = Math.floor(audioCtx.sampleRate * dur);
+  const buf = audioCtx.createBuffer(1, n, audioCtx.sampleRate);
+  const d = buf.getChannelData(0);
+  for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / n);
+  const src = audioCtx.createBufferSource();
+  const g = audioCtx.createGain();
+  g.gain.value = vol;
+  src.buffer = buf;
+  src.connect(g).connect(audioCtx.destination);
+  src.start(audioCtx.currentTime + quando);
+}
+const SONS = {
+  pulo: () => tom(330, 0.14, 'square', 0.05, 0, 320),
+  moeda: () => { tom(988, 0.08, 'triangle', 0.12); tom(1319, 0.14, 'triangle', 0.12, 0.07); },
+  pacote: () => { tom(660, 0.1, 'sine', 0.12); tom(880, 0.1, 'sine', 0.12, 0.08); tom(1175, 0.18, 'sine', 0.12, 0.16); },
+  inimigoMorre: () => tom(700, 0.12, 'square', 0.07, 0, -400),
+  dano: () => tom(300, 0.35, 'sawtooth', 0.09, 0, -200),
+  dialogo: () => tom(640 + Math.random() * 160, 0.05, 'triangle', 0.06),
+  missao: () => { tom(523, 0.1, 'triangle', 0.12); tom(659, 0.1, 'triangle', 0.12, 0.1); tom(784, 0.22, 'triangle', 0.12, 0.2); },
+  chave: () => [523, 659, 784, 1047].forEach((f, i) => tom(f, 0.18, 'triangle', 0.12, i * 0.09)),
+  erro: () => tom(160, 0.3, 'sawtooth', 0.08, 0, -60),
+  explosao: () => tom(120, 0.8, 'sawtooth', 0.18, 0, -90),
+  portao: () => tom(220, 0.9, 'sine', 0.12, 0, 660),
+  fase: () => [523, 659, 784, 1047, 1319].forEach((f, i) => tom(f, 0.22, 'triangle', 0.12, i * 0.12)),
+  gameover: () => [392, 349, 330, 262].forEach((f, i) => tom(f, 0.3, 'triangle', 0.12, i * 0.22)),
+  recupera: () => [523, 784, 1047].forEach((f, i) => tom(f, 0.2, 'triangle', 0.12, i * 0.1))
+};
+function tocar(nome) {
+  try {
+    garantirAudio();
+    if (SONS[nome]) SONS[nome]();
+  } catch (e) { /* falha de áudio não interrompe o jogo */ }
+}
+function alternarSom() {
+  somLigado = !somLigado;
+  garantirAudio();
+  document.getElementById('btnSom').textContent = somLigado ? 'Som: ligado' : 'Som: desligado';
+}
+document.getElementById('btnSom').addEventListener('click', alternarSom);
+document.addEventListener('pointerdown', garantirAudio);
+document.addEventListener('keydown', garantirAudio);
+
+/* ===== música de fundo opcional (trilha suave gerada pelo navegador) ===== */
+let musicaLigada = false, musicaTimer = null, musicaProx = 0, musicaPasso = 0;
+const NOTAS_MUSICA = [262, 311, 349, 392, 466, 392, 349, 311];
+function tomMusica(freq, quando, dur, vol) {
+  if (!audioCtx) return;
+  try {
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.type = 'triangle';
+    o.frequency.value = numOk(freq, 220);
+    g.gain.setValueAtTime(0.0001, quando);
+    g.gain.exponentialRampToValueAtTime(vol, quando + 0.03);
+    g.gain.exponentialRampToValueAtTime(0.0001, quando + dur);
+    o.connect(g).connect(audioCtx.destination);
+    o.start(quando);
+    o.stop(quando + dur + 0.05);
+  } catch (e) { /* música com problema não deve travar o jogo */ }
+}
+function agendarMusica() {
+  if (!musicaLigada || !audioCtx) return;
+  while (musicaProx < audioCtx.currentTime + 0.4) {
+    const f = NOTAS_MUSICA[musicaPasso % NOTAS_MUSICA.length];
+    tomMusica(f, musicaProx, 0.35, 0.035);
+    if (musicaPasso % 4 === 0) tomMusica(f / 2, musicaProx, 0.9, 0.03);
+    musicaProx += 0.36;
+    musicaPasso++;
+  }
+}
+function alternarMusica() {
+  garantirAudio();
+  const b = document.getElementById('btnMusica');
+  if (musicaLigada) {
+    musicaLigada = false;
+    clearInterval(musicaTimer);
+    b.textContent = 'Música: desligada';
+  } else if (audioCtx) {
+    musicaLigada = true;
+    musicaProx = audioCtx.currentTime + 0.1;
+    musicaTimer = setInterval(agendarMusica, 150);
+    b.textContent = 'Música: ligada';
+  }
+}
+document.getElementById('btnMusica').addEventListener('click', alternarMusica);
+
+mostrarTela(null);
+novaPartida();
+laco();
+</script>
+</body>
+</html>

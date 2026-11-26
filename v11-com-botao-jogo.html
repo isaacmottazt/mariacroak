@@ -1,0 +1,1443 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>A Ciência que nos Conecta · Marian Croak</title>
+<style>
+  :root{
+    --fundo:#0f0c14;
+    --fundo-2:#17121e;
+    --painel:#1d1727;
+    --painel-2:#261e33;
+    --linha:#352b45;
+    --texto:#f4eff8;
+    --suave:#b3a8c4;
+    --roxo:#a78bfa;
+    --roxo-forte:#7c5ce0;
+    --coral:#f4937a;
+    --menta:#86dcb9;
+    --ambar:#f5c76b;
+    --serif:Georgia,"Iowan Old Style","Palatino Linotype",serif;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth;scroll-padding-top:80px}
+  body{
+    background:var(--fundo);color:var(--texto);font-family:var(--sans);font-size:16px;line-height:1.65;overflow-x:hidden;
+    background-image:
+      radial-gradient(900px 500px at 85% -10%, rgba(124,92,224,.22), transparent 60%),
+      radial-gradient(700px 500px at -10% 40%, rgba(244,147,122,.10), transparent 60%);
+    background-attachment:fixed;
+  }
+  .ic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:0 0 auto}
+
+  /* ===== topo ===== */
+  .topo{position:sticky;top:0;z-index:30;background:rgba(15,12,20,.8);backdrop-filter:blur(12px);border-bottom:1px solid var(--linha)}
+  .topo-in{max-width:1120px;margin:0 auto;padding:.7rem 1.25rem;display:flex;align-items:center;gap:1rem;justify-content:space-between}
+  .marca{display:flex;align-items:center;gap:.6rem;font-family:var(--serif);color:var(--texto);text-decoration:none;font-size:1rem;white-space:nowrap}
+  .marca .ic{color:var(--roxo)}
+  .menu{display:flex;gap:.2rem;overflow-x:auto;scrollbar-width:none}
+  .menu a{color:var(--suave);text-decoration:none;font-size:.84rem;padding:.4rem .7rem;border-radius:999px;white-space:nowrap;transition:background .2s,color .2s}
+  .menu a:hover{color:var(--texto);background:var(--painel-2)}
+  .menu a.ativo{color:#fff;background:var(--roxo-forte)}
+  .barra-topo{position:absolute;left:0;bottom:-1px;height:2px;width:0;background:linear-gradient(90deg,var(--roxo),var(--coral));transition:width .1s linear}
+
+  main{max-width:1120px;margin:0 auto;padding:0 1.25rem 4rem}
+
+  /* ===== faixa animada ===== */
+  .faixa-marq{overflow:hidden;border-bottom:1px solid var(--linha);background:var(--fundo-2);white-space:nowrap}
+  .trilha-marq{display:inline-flex;gap:2.5rem;padding:.8rem 0;animation:marq 32s linear infinite;font-family:var(--serif);font-style:italic;color:var(--suave);font-size:1.05rem}
+  .trilha-marq span{display:inline-flex;align-items:center;gap:2.5rem}
+  .trilha-marq span::after{content:"";width:6px;height:6px;border-radius:50%;background:var(--coral)}
+  @keyframes marq{to{transform:translateX(-50%)}}
+
+  /* ===== hero ===== */
+  .hero{position:relative;display:grid;grid-template-columns:1.1fr .9fr;gap:2rem;align-items:center;padding:4.5rem 0 4rem}
+  @media(max-width:860px){.hero{grid-template-columns:1fr;padding-top:3rem}.hero-arte{order:-1}}
+  .etiqueta{display:inline-flex;gap:.5rem;align-items:center;font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--ambar);background:rgba(245,199,107,.08);border:1px solid rgba(245,199,107,.25);padding:.35rem .8rem;border-radius:999px}
+  .hero h1{font-family:var(--serif);font-weight:normal;font-size:clamp(2.4rem,5.6vw,4.1rem);line-height:1.05;margin:1.1rem 0 1.2rem;letter-spacing:-.01em}
+  .hero h1 .palavra{display:inline-block;opacity:0;transform:translateY(.4em);animation:subir .7s forwards;animation-delay:var(--d)}
+  .hero h1 em{font-style:italic;color:var(--roxo)}
+  .resumo{color:var(--suave);max-width:560px;font-size:1.06rem}
+  .botoes{display:flex;gap:.7rem;flex-wrap:wrap;margin-top:2rem}
+  .btn{display:inline-flex;align-items:center;gap:.5rem;background:var(--roxo-forte);color:#fff;border:none;border-radius:12px;
+    padding:.8rem 1.25rem;font:inherit;font-weight:600;cursor:pointer;text-decoration:none;box-shadow:0 10px 30px -12px rgba(124,92,224,.8);
+    transition:transform .2s,background .2s,box-shadow .2s}
+  .btn:hover{background:#6a4dd1;transform:translateY(-2px);box-shadow:0 14px 34px -12px rgba(124,92,224,.9)}
+  .btn:active{transform:translateY(0) scale(.98)}
+  .btn .ic{transition:transform .2s}
+  .btn:hover .ic{transform:translateX(3px)}
+  .btn.secundario{background:transparent;color:var(--texto);border:1px solid var(--linha);box-shadow:none}
+  .btn.secundario:hover{border-color:var(--roxo);background:transparent}
+  .btn:disabled{opacity:.45;cursor:default;transform:none}
+  .hero-arte{position:relative;aspect-ratio:1/1;max-width:440px;width:100%;justify-self:center}
+  .hero-arte svg{width:100%;height:100%;overflow:visible}
+  .anel{transform-origin:200px 200px;animation:girar 24s linear infinite}
+  .anel.rev{animation-direction:reverse;animation-duration:34s}
+  @keyframes girar{to{transform:rotate(360deg)}}
+  .pulso{animation:pulso 2.8s ease-out infinite;transform-origin:200px 200px}
+  .pulso.p2{animation-delay:1.4s}
+  @keyframes pulso{0%{opacity:.6;transform:scale(.6)}100%{opacity:0;transform:scale(1.25)}}
+  .flutua{animation:flutua 6s ease-in-out infinite}
+  @keyframes flutua{50%{transform:translateY(-10px)}}
+  @keyframes subir{to{opacity:1;transform:none}}
+
+  .faixa-info{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1rem}
+  @media(max-width:700px){.faixa-info{grid-template-columns:1fr}}
+  .info{background:var(--painel);border:1px solid var(--linha);border-radius:16px;padding:1.1rem 1.2rem;transition:transform .3s,border-color .3s}
+  .info:hover{transform:translateY(-3px);border-color:var(--coral)}
+  .info .ic{color:var(--coral);margin-bottom:.5rem}
+  .info h4{font-size:.95rem;margin-bottom:.2rem}
+  .info p{font-size:.88rem;color:var(--suave)}
+
+  /* ===== reveal e spotlight ===== */
+  [data-rv]{opacity:0;transform:translateY(26px);transition:opacity .8s cubic-bezier(.2,.7,.2,1),transform .8s cubic-bezier(.2,.7,.2,1);transition-delay:var(--d,0s)}
+  [data-rv].on{opacity:1;transform:none}
+  .spot{position:relative;overflow:hidden}
+  .spot::after{content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;opacity:0;transition:opacity .35s;
+    background:radial-gradient(260px circle at var(--sx,50%) var(--sy,50%),rgba(167,139,250,.16),transparent 65%)}
+  .spot:hover::after{opacity:1}
+
+  /* ===== missões ===== */
+  section.missao{position:relative;padding:4.5rem 0;scroll-margin-top:90px}
+  section.missao+section.missao{border-top:1px solid var(--linha)}
+  .cab{display:grid;grid-template-columns:auto 1fr;gap:1rem 1.4rem;align-items:end;margin-bottom:2rem}
+  .grande-num{font-family:var(--serif);font-size:clamp(3.4rem,8vw,5.4rem);line-height:.85;color:transparent;-webkit-text-stroke:1.2px var(--roxo);opacity:.9;transition:color .5s,-webkit-text-stroke-color .5s}
+  .missao.on .grande-num{color:rgba(167,139,250,.12)}
+  .cab .chapeu{font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;color:var(--coral);margin-bottom:.3rem}
+  .cab h2{font-family:var(--serif);font-weight:normal;font-size:clamp(1.8rem,4vw,2.6rem);line-height:1.12}
+  .lead{color:var(--suave);max-width:700px;font-size:1.05rem}
+  .corpo-texto{max-width:700px;color:#dcd4e6}
+  .citacao{font-family:var(--serif);font-style:italic;font-size:1.35rem;line-height:1.5;border-left:3px solid var(--coral);padding:.2rem 0 .2rem 1.2rem;margin:1.6rem 0;max-width:680px}
+
+  .caixa{margin-top:2rem;background:linear-gradient(135deg,var(--painel),var(--painel-2));border:1px solid var(--linha);border-radius:18px;padding:1.4rem 1.5rem;max-width:720px;position:relative}
+  .caixa::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--menta);border-radius:4px 0 0 4px}
+  .caixa .rotulo{font-size:.74rem;text-transform:uppercase;letter-spacing:.14em;color:var(--menta);font-weight:700;margin-bottom:.4rem;display:flex;gap:.4rem;align-items:center}
+  .caixa p{color:#e6def0}
+  .rotulo{font-size:.74rem;text-transform:uppercase;letter-spacing:.14em;color:var(--coral);font-weight:700}
+
+  /* missão 1 */
+  .m1-grid{display:grid;grid-template-columns:.9fr 1.1fr;gap:2.6rem;align-items:center;margin-top:1rem}
+  @media(max-width:860px){.m1-grid{grid-template-columns:1fr}}
+  .m1-figura{position:relative;background:radial-gradient(circle at 50% 30%,rgba(124,92,224,.2),transparent 70%),var(--painel);border:1px solid var(--linha);border-radius:26px;padding:1.4rem 1rem .9rem;text-align:center;margin:0;cursor:pointer;user-select:none}
+  .m1-figura figcaption{font-size:.76rem;color:var(--suave);margin-top:.5rem;line-height:1.4}
+  .figWrap{position:relative;transform-style:preserve-3d;transition:transform .25s ease-out;will-change:transform;max-width:300px;margin:0 auto}
+  .personagem{width:100%;height:auto;display:block}
+  .balao{position:absolute;top:-6px;left:50%;transform:translateX(-50%);background:var(--texto);color:#1d1727;font-weight:600;font-size:.84rem;padding:.45rem .85rem;border-radius:14px;white-space:nowrap;box-shadow:0 8px 20px -8px rgba(0,0,0,.6);z-index:3}
+  .balao::after{content:"";position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);border:6px solid transparent;border-top-color:var(--texto);border-bottom:0}
+  .balao.troca{animation:trocaBalao .5s both}
+  @keyframes trocaBalao{from{opacity:0;transform:translate(-50%,8px) scale(.9)}to{opacity:1;transform:translate(-50%,0) scale(1)}}
+  .bit{font-family:var(--sans);font-size:12px;fill:var(--roxo);opacity:0;animation:subirBit 7s linear infinite}
+  @keyframes subirBit{0%{transform:translateY(30px);opacity:0}20%{opacity:.7}100%{transform:translateY(-90px);opacity:0}}
+  .olhos{transform-box:view-box;transform-origin:150px 150px;animation:piscar 4.6s infinite}
+  @keyframes piscar{0%,44%,50%,100%{transform:scaleY(1)}47%{transform:scaleY(.1)}}
+  .cabeca{transform-box:view-box;transform-origin:150px 260px;animation:respirarC 4s ease-in-out infinite}
+  @keyframes respirarC{50%{transform:translateY(-3px) rotate(-1deg)}}
+  .anel-p{transform-box:view-box;transform-origin:150px 160px;animation:girar 30s linear infinite}
+  .ondas-w .w{stroke-dasharray:40;stroke-dashoffset:40;opacity:0;animation:ondaW 1.8s ease-out infinite}
+  .ondas-w .w2{animation-delay:.3s}
+  .ondas-w .w3{animation-delay:.6s}
+  @keyframes ondaW{0%{opacity:0;stroke-dashoffset:40}30%{opacity:1}100%{opacity:0;stroke-dashoffset:-20}}
+  .m1-figura.falar .ondas-w .w{animation-duration:.6s}
+  .m1-texto .lead{font-size:1.08rem}
+  .m1-texto .corpo{color:#dcd4e6;margin-top:1rem;max-width:620px}
+  .m1-texto .citacao{margin-top:1.4rem}
+  .fatos{display:grid;grid-template-columns:repeat(3,1fr);gap:1.1rem;margin-top:2.6rem}
+  @media(max-width:860px){.fatos{grid-template-columns:1fr}}
+  .fato{position:relative;background:var(--painel);border:1px solid var(--linha);border-radius:20px;padding:1.4rem;display:flex;flex-direction:column;gap:.7rem;min-height:250px;transition:transform .3s,border-color .3s,box-shadow .5s}
+  .fato:hover{transform:translateY(-4px);border-color:var(--roxo)}
+  .fato.revelado{border-color:var(--roxo);box-shadow:0 0 0 1px var(--roxo),0 24px 44px -24px rgba(124,92,224,.7)}
+  .fato .marca-fundo{position:absolute;right:-18px;bottom:-22px;font-family:var(--serif);font-size:9rem;color:rgba(255,255,255,.025);line-height:1;pointer-events:none}
+  .fato .icone{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;background:rgba(167,139,250,.14);color:var(--roxo);position:relative;z-index:1}
+  .fato:nth-child(2) .icone{background:rgba(244,147,122,.14);color:var(--coral)}
+  .fato:nth-child(3) .icone{background:rgba(134,220,185,.14);color:var(--menta)}
+  .fato.revelado .icone{animation:saltar .7s}
+  @keyframes saltar{30%{transform:scale(1.25) rotate(-8deg)}60%{transform:scale(.95)}100%{transform:none}}
+  .fato .valor{font-family:var(--serif);font-size:3.2rem;line-height:1;margin-top:auto;min-height:3.2rem;position:relative;z-index:1}
+  .fato .valor.bum{animation:bum .5s}
+  @keyframes bum{40%{transform:scale(1.12)}}
+  .fato p{color:var(--suave);font-size:.92rem;position:relative;z-index:1}
+  .fato button{align-self:flex-start;background:var(--painel-2);color:var(--texto);border:1px solid var(--linha);border-radius:999px;padding:.4rem .9rem;font:inherit;font-size:.84rem;cursor:pointer;display:inline-flex;gap:.4rem;align-items:center;position:relative;z-index:1;transition:border-color .2s}
+  .fato button:hover{border-color:var(--roxo)}
+  .fato.revelado button{opacity:0;pointer-events:none;transition:opacity .3s}
+
+  /* missão 2 *//* missão 2 */
+  .vip-grid{display:grid;grid-template-columns:.9fr 1.3fr;gap:1.6rem;align-items:start;margin-top:2rem}
+  @media(max-width:900px){.vip-grid{grid-template-columns:1fr}}
+  .etapas{list-style:none;display:grid;gap:.6rem}
+  .etapa{display:grid;grid-template-columns:44px 1fr;gap:.9rem;align-items:center;padding:.8rem;border-radius:14px;border:1px solid transparent;transition:all .4s;color:var(--suave)}
+  .etapa .bola{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;border:1px solid var(--linha);font-family:var(--serif);font-size:1.1rem;transition:all .4s}
+  .etapa strong{display:block;color:var(--texto);font-weight:600;font-size:.98rem}
+  .etapa .txt{font-size:.88rem;display:block}
+  .etapa.ativa{background:var(--painel);border-color:var(--roxo);transform:translateX(6px)}
+  .etapa.ativa .bola{background:var(--roxo);border-color:var(--roxo);color:#fff;box-shadow:0 0 0 6px rgba(167,139,250,.18)}
+  .etapa.feita .bola{background:var(--menta);border-color:var(--menta);color:#0d2a1f}
+  .onda{display:flex;align-items:center;justify-content:center;gap:4px;height:46px;margin-bottom:.8rem}
+  .onda i{display:block;width:4px;height:10px;border-radius:4px;background:var(--linha);transition:background .3s}
+  .onda.on i{background:var(--roxo);animation:onda .9s ease-in-out infinite}
+  .onda i:nth-child(2n){animation-delay:-.35s}
+  .onda i:nth-child(3n){animation-delay:-.6s}
+  .onda i:nth-child(5n){animation-delay:-.15s}
+  @keyframes onda{50%{height:42px}}
+  .painel-rede{background:var(--painel);border:1px solid var(--linha);border-radius:20px;padding:1rem;overflow:hidden}
+  .painel-rede svg{width:100%;height:auto;display:block}
+  .rota{fill:none;stroke:var(--linha);stroke-width:2;stroke-dasharray:6 8;transition:stroke .4s,opacity .4s}
+  .rota.ativa{stroke:var(--roxo);stroke-dasharray:none;opacity:.7}
+  .pacote rect{fill:var(--roxo);stroke:#fff;stroke-width:1.5}
+  .pacote.atraso rect{fill:var(--coral)}
+  .pacote text{fill:#fff;font-family:var(--sans);font-size:14px;font-weight:700;text-anchor:middle;dominant-baseline:middle;pointer-events:none}
+  .no-bloco{fill:var(--painel-2);stroke:var(--linha)}
+  .no-txt{fill:var(--suave);font-size:14px;font-family:var(--sans);text-anchor:middle}
+  .chegada{display:flex;flex-wrap:wrap;gap:.5rem;min-height:44px;align-items:center;margin:1rem 0 .4rem;padding:.6rem;background:var(--fundo-2);border-radius:14px;border:1px dashed var(--linha)}
+  .chip{padding:.3rem .75rem;border-radius:8px;background:var(--painel-2);border:1px solid var(--linha);font-size:.84rem;color:var(--suave);transition:all .5s cubic-bezier(.2,.8,.2,1)}
+  .chip.ok{color:var(--texto);border-color:var(--menta);background:rgba(134,220,185,.1)}
+  .vazio{font-size:.86rem;color:var(--suave)}
+  .status{min-height:1.5em;font-size:.95rem;margin:.4rem 0 .9rem}
+
+  .experimento{margin-top:2.4rem;background:var(--painel);border:1px solid var(--linha);border-radius:22px;padding:1.6rem;position:relative;overflow:hidden}
+  .experimento h3{font-family:var(--serif);font-weight:normal;font-size:1.5rem;margin-bottom:.3rem}
+  .experimento > p{color:var(--suave);font-size:.95rem;margin-bottom:1.1rem}
+  .entrada{display:flex;gap:.6rem;flex-wrap:wrap}
+  .entrada input{flex:1;min-width:200px;background:var(--fundo-2);border:1px solid var(--linha);border-radius:12px;padding:.75rem 1rem;color:var(--texto);font:inherit;outline:none;transition:border-color .2s}
+  .entrada input:focus{border-color:var(--roxo)}
+  .codigos{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:1rem;min-height:30px}
+  .codigos span{font-size:.8rem;padding:.25rem .5rem;border-radius:6px;background:var(--fundo-2);border:1px solid var(--linha);color:var(--ambar);font-variant-numeric:tabular-nums;animation:surgir .4s both;animation-delay:var(--d)}
+  .pacotes-exp{display:flex;flex-wrap:wrap;gap:.8rem;margin-top:1.2rem;min-height:70px}
+  .pct-exp{background:var(--fundo-2);border:1px solid var(--roxo);border-radius:12px;padding:.5rem .7rem;min-width:110px;transition:order .3s,transform .5s cubic-bezier(.2,.8,.2,1);animation:surgir .5s both;animation-delay:var(--d)}
+  .pct-exp b{display:block;font-size:.72rem;color:var(--roxo);letter-spacing:.08em;text-transform:uppercase;font-weight:700}
+  .pct-exp span{font-size:.92rem;font-variant-numeric:tabular-nums}
+  .pct-exp.fora{border-color:var(--coral)}
+  .pct-exp.fora b{color:var(--coral)}
+  .controles-exp{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1rem}
+  .nota-exp{font-size:.9rem;color:var(--suave);margin-top:.8rem;min-height:1.4em}
+  @keyframes surgir{from{opacity:0;transform:translateY(8px) scale(.96)}to{opacity:1;transform:none}}
+
+  /* experimento: frase enviada */
+  .no-bloco{transition:stroke .3s,stroke-width .3s}
+  .no-bloco.pulsa{stroke:var(--roxo);stroke-width:3;filter:drop-shadow(0 0 10px rgba(167,139,250,.85))}
+  .pacote rect{filter:drop-shadow(0 0 6px rgba(167,139,250,.9))}
+  .pacote.atraso rect{filter:drop-shadow(0 0 6px rgba(244,147,122,.9))}
+  .reconstruida{margin-top:1.2rem;padding:1rem 1.2rem;border-radius:14px;background:var(--fundo-2);border:1px dashed var(--linha);display:none}
+  .reconstruida.mostrar{display:block;animation:surgir .5s both}
+  .rotulo-rec{font-size:.72rem;text-transform:uppercase;letter-spacing:.12em;color:var(--menta);font-weight:700}
+  .texto-rec{font-family:var(--serif);font-size:1.6rem;margin-top:.3rem;white-space:pre-wrap;word-break:break-word;min-height:2.2rem}
+  .texto-rec span{display:inline-block;animation:bumLetra .45s both}
+  @keyframes bumLetra{from{opacity:0;transform:translateY(-12px) scale(1.5);color:var(--coral)}to{opacity:1;transform:none}}
+  .pct-exp.fora{border-color:var(--coral)}
+  .pct-exp.fora b{color:var(--coral)}
+  .pct-exp{transition:order .4s,border-color .4s}
+
+  /* chip que chegou fora de ordem */
+  .chip.fora{border-color:var(--coral);color:var(--coral)}
+
+  /* missão 3 */
+  .tempo-wrap{position:relative;max-width:820px;margin-top:2rem;padding-left:2.2rem}
+  .tempo-wrap::before{content:"";position:absolute;left:.6rem;top:.6rem;bottom:.6rem;width:2px;background:var(--linha);border-radius:2px}
+  .tempo-fill{position:absolute;left:.6rem;top:.6rem;width:2px;height:0;background:linear-gradient(var(--roxo),var(--coral),var(--menta));border-radius:2px;transition:height .15s linear}
+  .evento{position:relative;margin-bottom:1rem}
+  .evento::before{content:"";position:absolute;left:-2.2rem;top:1.25rem;width:16px;height:16px;border-radius:50%;background:var(--fundo);border:3px solid var(--roxo);box-shadow:0 0 0 4px var(--fundo);transition:background .3s,transform .3s}
+  .evento.aceso::before{background:var(--roxo);transform:scale(1.15)}
+  .evento.destaque::before{background:var(--coral);border-color:var(--coral);width:20px;height:20px;left:-2.35rem;top:1.15rem}
+  .evento details{background:var(--painel);border:1px solid var(--linha);border-radius:16px;overflow:hidden;transition:border-color .3s}
+  .evento details[open]{border-color:var(--roxo)}
+  .evento.destaque details{border-color:rgba(244,147,122,.5)}
+  .evento summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:1rem;padding:1rem 1.2rem}
+  .evento summary::-webkit-details-marker{display:none}
+  .evento summary .ico{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:var(--painel-2);color:var(--roxo);flex:0 0 42px;transition:transform .4s}
+  .evento details[open] summary .ico{transform:rotate(-8deg) scale(1.06)}
+  .evento.destaque summary .ico{color:var(--coral);background:rgba(244,147,122,.12)}
+  .evento summary .ano{font-size:.78rem;color:var(--ambar);letter-spacing:.06em;text-transform:uppercase;display:block}
+  .evento summary .titulo{font-family:var(--serif);font-size:1.2rem;display:block;line-height:1.2}
+  .evento summary .seta{margin-left:auto;color:var(--suave);transition:transform .3s}
+  .evento details[open] summary .seta{transform:rotate(180deg)}
+  .evento .corpo{padding:0 1.2rem 1.2rem 4.2rem;color:var(--suave);font-size:.96rem;animation:surgir .45s both}
+  .evento .corpo b{color:var(--texto);font-weight:600}
+
+  .curiosidades{margin-top:2.6rem;max-width:820px}
+  .curiosidades h3{font-family:var(--serif);font-weight:normal;font-size:1.5rem;margin-bottom:1rem;display:flex;align-items:center;gap:.6rem}
+  .curiosidades h3 .ic{color:var(--ambar)}
+  .carrossel{position:relative;background:var(--painel);border:1px solid var(--linha);border-radius:22px;overflow:hidden;min-height:170px}
+  .slides{display:flex;transition:transform .7s cubic-bezier(.2,.8,.2,1)}
+  .slide{flex:0 0 100%;padding:1.8rem 2rem;display:flex;flex-direction:column;gap:.5rem}
+  .slide .n{font-family:var(--serif);font-size:2.6rem;color:var(--roxo);line-height:1}
+  .slide p{color:#e6def0;font-size:1rem}
+  .slide small{color:var(--suave)}
+  .carrossel-nav{display:flex;align-items:center;justify-content:space-between;margin-top:.9rem;gap:1rem}
+  .pontos{display:flex;gap:.4rem}
+  .pontos button{width:8px;height:8px;border-radius:50%;background:var(--linha);border:none;cursor:pointer;padding:0;transition:all .3s}
+  .pontos button.ativo{background:var(--coral);width:22px;border-radius:8px}
+  .setas{display:flex;gap:.4rem}
+  .setas button{width:40px;height:40px;border-radius:12px;background:var(--painel);border:1px solid var(--linha);color:var(--texto);display:grid;place-items:center;cursor:pointer;transition:border-color .2s}
+  .setas button:hover{border-color:var(--roxo)}
+  .setas .ic{width:18px;height:18px}
+  .setas button.esq .ic{transform:rotate(180deg)}
+
+  /* missão 4 */
+  .pista{position:relative;background:linear-gradient(180deg,var(--painel),var(--fundo-2));border:1px solid var(--linha);border-radius:20px;padding:1.2rem;overflow:hidden;margin-top:2rem}
+  .lane{display:grid;grid-template-columns:150px 1fr;align-items:center;height:72px;border-bottom:1px dashed var(--linha)}
+  .lane:last-child{border-bottom:none}
+  .info-lane{display:flex;gap:.6rem;align-items:center;font-size:.92rem;font-weight:600}
+  .info-lane small{display:block;font-weight:400;color:var(--suave);font-size:.76rem}
+  .ic-circ{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;flex:0 0 38px}
+  .trilho{position:relative;height:100%;display:flex;align-items:center}
+  .trilho::before{content:"";position:absolute;left:0;right:0;top:50%;height:2px;background:repeating-linear-gradient(90deg,var(--linha) 0 10px,transparent 10px 18px)}
+  .chegada-linha{position:absolute;right:0;top:12px;bottom:12px;width:26px;background:repeating-conic-gradient(#fff 0 25%,#1a1521 0 50%) 0 0/13px 13px;border-radius:3px;opacity:.85}
+  .veiculo{position:absolute;left:0;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:#fff;box-shadow:0 8px 20px -6px rgba(0,0,0,.6);z-index:2}
+  .veiculo.pulsa{animation:pulsa .9s ease-in-out infinite}
+  @keyframes pulsa{50%{box-shadow:0 0 0 10px rgba(255,255,255,.05),0 8px 20px -6px rgba(0,0,0,.6)}}
+  .controles{display:flex;gap:.7rem;flex-wrap:wrap;margin-top:1.2rem;align-items:center}
+  .placar-corrida{margin-top:1rem;min-height:1.6em}
+  .podio{display:flex;gap:.6rem;flex-wrap:wrap}
+  .podio span{padding:.35rem .75rem;border-radius:999px;background:var(--painel-2);border:1px solid var(--linha);font-size:.85rem;animation:surgir .5s both;animation-delay:var(--d)}
+  .podio span b{color:var(--ambar)}
+  .sobre-tempo{margin-top:.6rem;font-size:.88rem;color:var(--suave)}
+
+  /* missão 5 */
+  .em-caixa{background:var(--painel);border:1px solid var(--linha);border-radius:22px;padding:1.6rem;margin-top:2rem}
+  .em-caixa .rotulo{margin-bottom:1.2rem}
+  .fluxo-em{position:relative;display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
+  .fluxo-em::before{content:"";position:absolute;left:16.6%;right:16.6%;top:35px;height:2px;background:repeating-linear-gradient(90deg,var(--linha) 0 8px,transparent 8px 14px)}
+  .no-f{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;text-align:center;gap:.4rem;padding:.4rem}
+  .ic-no{width:58px;height:58px;border-radius:18px;display:grid;place-items:center;background:var(--painel-2);border:1px solid var(--linha);color:var(--roxo);transition:all .5s}
+  .no-f.ativo .ic-no{background:var(--roxo-forte);color:#fff;border-color:var(--roxo);box-shadow:0 0 0 8px rgba(167,139,250,.15)}
+  .no-f strong{font-size:.92rem}
+  .no-f small{color:var(--suave);font-size:.8rem;max-width:200px}
+  .bola-em{position:absolute;left:-7px;top:35px;width:14px;height:14px;border-radius:50%;background:var(--coral);box-shadow:0 0 14px var(--coral);opacity:0;z-index:2;transform:translate(0,-50%)}
+  .em-caixa .status{text-align:center;margin:1.2rem 0 0}
+  .em-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-top:1.2rem}
+  @media(max-width:820px){.em-grid{grid-template-columns:1fr}}
+  .em-painel{background:var(--painel);border:1px solid var(--linha);border-radius:20px;padding:1.5rem}
+  .em-painel h3{font-family:var(--serif);font-weight:normal;font-size:1.4rem;margin-bottom:.3rem}
+  .em-painel h4{font-size:.8rem;text-transform:uppercase;letter-spacing:.1em;color:var(--suave);margin:1.4rem 0 .6rem;font-weight:600}
+  .pequeno{font-size:.88rem;color:var(--suave)}
+  .doar{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;margin-top:1rem}
+  .doar button{background:var(--fundo-2);color:var(--texto);border:1px solid var(--linha);border-radius:14px;padding:.9rem .3rem;font:inherit;cursor:pointer;transition:transform .2s,border-color .2s}
+  .doar button:hover:not(:disabled){border-color:var(--coral);transform:translateY(-3px)}
+  .doar button:disabled{opacity:.4;cursor:default;transform:none}
+  .doar button b{display:block;font-family:var(--serif);font-size:1.6rem;font-weight:normal;color:var(--coral)}
+  .contador{display:flex;align-items:baseline;gap:.5rem;font-family:var(--serif);font-size:2.8rem;line-height:1}
+  .contador small{font-family:var(--sans);font-size:.9rem;color:var(--suave)}
+  .barra-meta{height:12px;background:var(--fundo-2);border-radius:12px;overflow:hidden;margin:1rem 0 .5rem;border:1px solid var(--linha)}
+  .barra-meta div{height:100%;width:0;background:linear-gradient(90deg,var(--roxo),var(--menta));border-radius:12px;transition:width .8s cubic-bezier(.3,1.2,.4,1)}
+  .log-lista{list-style:none;display:grid;gap:.4rem;max-height:200px;overflow-y:auto}
+  .log-lista li{font-size:.9rem;padding:.5rem .75rem;border-radius:10px;background:var(--fundo-2);border:1px solid var(--linha);display:flex;justify-content:space-between;animation:surgir .4s both}
+  .log-lista li.vazio{color:var(--suave);background:none;border:1px dashed var(--linha);justify-content:center}
+  .log-lista li b{color:var(--menta)}
+  .aviso-meta{margin-top:1rem;color:var(--menta);font-weight:600;min-height:1.5em;font-size:.94rem}
+  /* missão 6 */
+  .grade{display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem;max-width:820px;margin-top:2rem}
+  @media(max-width:640px){.grade{grid-template-columns:repeat(2,1fr)}}
+  .carta{height:124px;perspective:900px;cursor:pointer;outline:none}
+  .carta .in{position:relative;width:100%;height:100%;transition:transform .55s cubic-bezier(.3,.7,.3,1);transform-style:preserve-3d}
+  .carta:hover:not(.virada) .in{transform:translateY(-3px) rotateX(4deg)}
+  .carta.virada .in,.carta.certa .in{transform:rotateY(180deg)}
+  .carta .f,.carta .v{position:absolute;inset:0;border-radius:16px;display:grid;place-items:center;padding:.7rem;text-align:center;backface-visibility:hidden}
+  .carta .f{background:radial-gradient(circle at 30% 20%,#3a2c5c,var(--painel-2));border:1px solid var(--linha);font-family:var(--serif);font-size:2rem;color:var(--roxo)}
+  .carta .v{background:var(--painel);border:1px solid var(--roxo);transform:rotateY(180deg);font-size:.86rem;line-height:1.35}
+  .carta.certa .v{border-color:var(--menta);background:rgba(134,220,185,.08);color:var(--menta);animation:brilho .8s}
+  .carta.errada .v{border-color:var(--coral);animation:treme .4s}
+  @keyframes brilho{0%{box-shadow:0 0 0 0 rgba(134,220,185,.6)}100%{box-shadow:0 0 0 14px rgba(134,220,185,0)}}
+  @keyframes treme{25%{transform:rotateY(180deg) translateX(-5px)}75%{transform:rotateY(180deg) translateX(5px)}}
+  .memo-legenda{margin-top:1.2rem;min-height:1.5em;color:var(--suave)}
+  .memo-acoes{margin-top:1rem;display:flex;gap:.6rem;align-items:center;flex-wrap:wrap}
+  .jogadas{font-size:.88rem;color:var(--suave)}
+
+  /* missão 7 */
+  .quiz-wrap{display:grid;grid-template-columns:1fr 240px;gap:1.6rem;align-items:start;margin-top:2rem}
+  @media(max-width:860px){.quiz-wrap{grid-template-columns:1fr}}
+  .quiz-card{background:var(--painel);border:1px solid var(--linha);border-radius:22px;padding:1.6rem;min-height:380px}
+  .quiz-prog{display:flex;gap:.4rem;margin-bottom:1.1rem}
+  .quiz-prog span{flex:1;height:6px;border-radius:6px;background:var(--linha);transition:background .4s}
+  .quiz-prog span.feita{background:var(--roxo)}
+  .quiz-prog span.atual{background:var(--coral)}
+  .pergunta{font-family:var(--serif);font-size:1.4rem;line-height:1.3;margin-bottom:1.1rem;animation:surgir .5s both}
+  .opcoes{display:grid;gap:.6rem}
+  .opcao{display:flex;gap:.8rem;align-items:center;text-align:left;background:var(--fundo-2);border:1px solid var(--linha);border-radius:14px;padding:.8rem 1rem;color:var(--texto);font:inherit;cursor:pointer;transition:transform .2s,border-color .2s,background .2s;animation:surgir .45s both;animation-delay:var(--d)}
+  .opcao:hover:not(:disabled){border-color:var(--roxo);background:var(--painel-2);transform:translateX(4px)}
+  .opcao .letra{width:30px;height:30px;border-radius:9px;border:1px solid var(--linha);display:grid;place-items:center;font-size:.85rem;color:var(--suave);flex:0 0 30px;font-family:var(--serif);transition:all .3s}
+  .opcao.certa{border-color:var(--menta);background:rgba(134,220,185,.08)}
+  .opcao.certa .letra{background:var(--menta);border-color:var(--menta);color:#0d2a1f}
+  .opcao.errada{border-color:var(--coral);animation:treme .4s}
+  .opcao.errada .letra{background:var(--coral);border-color:var(--coral);color:#3a1208}
+  .opcao:disabled{cursor:default}
+  .feedback{margin-top:1rem;padding:1rem 1.1rem;border-radius:14px;background:var(--fundo-2);border:1px solid var(--linha);font-size:.94rem;color:var(--suave);display:none;animation:surgir .4s both}
+  .feedback.mostrar{display:block}
+  .feedback strong{color:var(--texto)}
+  .quiz-acoes{margin-top:1.1rem;display:none}
+  .quiz-acoes.mostrar{display:block}
+  .placar-lado{background:var(--painel);border:1px solid var(--linha);border-radius:22px;padding:1.4rem;text-align:center;position:sticky;top:90px}
+  .placar-lado svg{width:160px;height:160px}
+  .placar-lado .num{font-family:var(--serif);font-size:2.4rem;margin-top:-6px}
+  .placar-lado p{color:var(--suave);font-size:.88rem}
+  .final-msg{margin-top:1.4rem;padding-top:1.2rem;border-top:1px solid var(--linha);color:var(--suave);font-size:.94rem}
+  .final-msg strong{color:var(--texto);display:block;font-family:var(--serif);font-size:1.2rem;font-weight:normal;margin-bottom:.3rem}
+  .fim-quiz{animation:surgir .6s both}
+
+  .rodape{padding:2.4rem 0 3rem;color:var(--suave);font-size:.84rem;text-align:center;border-top:1px solid var(--linha)}
+
+  :focus-visible{outline:2px solid var(--ambar);outline-offset:3px;border-radius:8px}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}[data-rv]{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+
+<!-- Sprite de ícones -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></symbol>
+    <symbol id="i-phone" viewBox="0 0 24 24"><rect x="7" y="2.5" width="10" height="19" rx="2"/><path d="M11 18.5h2"/></symbol>
+    <symbol id="i-pc" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></symbol>
+    <symbol id="i-letter" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></symbol>
+    <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.5 3 14.5 0 18M12 3c-3 3.5-3 14.5 0 18"/></symbol>
+    <symbol id="i-award" viewBox="0 0 24 24"><circle cx="12" cy="9" r="6"/><path d="m8.5 14-1.5 7 5-2.5 5 2.5-1.5-7"/></symbol>
+    <symbol id="i-building" viewBox="0 0 24 24"><path d="M3 21h18M5 21V8l7-5 7 5v13M9 21v-6h6v6"/></symbol>
+    <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></symbol>
+    <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></symbol>
+    <symbol id="i-flag" viewBox="0 0 24 24"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M4 12a8 8 0 0 1 14-5.3L20 9M20 4v5h-5M20 12a8 8 0 0 1-14 5.3L4 15M4 20v-5h5"/></symbol>
+    <symbol id="i-shuffle" viewBox="0 0 24 24"><path d="M3 7h3l8 10h4M3 17h3l3-4M14 7h4M17 4l3 3-3 3M17 14l3 3-3 3"/></symbol>
+    <symbol id="i-box" viewBox="0 0 24 24"><path d="M3 7l9-4 9 4v10l-9 4-9-4zM3 7l9 4 9-4M12 11v10"/></symbol>
+    <symbol id="i-scale" viewBox="0 0 24 24"><path d="M12 3v18M6 21h12M5 7h14M5 7l-3 6a3 3 0 0 0 6 0zM19 7l-3 6a3 3 0 0 0 6 0z"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4v16l13-8z"/></symbol>
+    <symbol id="i-wave" viewBox="0 0 24 24"><path d="M2 12h2M6 8v8M10 4v16M14 7v10M18 9v6M22 12h0"/></symbol>
+    <symbol id="i-route" viewBox="0 0 24 24"><circle cx="6" cy="19" r="2.5"/><circle cx="18" cy="5" r="2.5"/><path d="M8.5 19H14a4 4 0 0 0 0-8h-4a4 4 0 0 1 0-8h5.5"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18.5 14.5A6.5 6.5 0 0 1 21.5 20"/></symbol>
+    <symbol id="i-lightbulb" viewBox="0 0 24 24"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/></symbol>
+    <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6"/></symbol>
+    <symbol id="i-cursor" viewBox="0 0 24 24"><path d="M5 3l14 7-6 2-2 6z"/></symbol>
+  </defs>
+</svg>
+
+<header class="topo" id="topo">
+  <div class="topo-in">
+    <a class="marca" href="#inicio"><svg class="ic"><use href="#i-wave"/></svg>A Ciência que nos Conecta</a>
+    <nav class="menu" aria-label="Missões">
+      <a href="#missao1" data-nav="missao1">Quem foi</a>
+      <a href="#missao2" data-nav="missao2">VoIP</a>
+      <a href="#missao3" data-nav="missao3">Linha do tempo</a>
+      <a href="#missao4" data-nav="missao4">Corrida</a>
+      <a href="#missao5" data-nav="missao5">Emergências</a>
+      <a href="#missao6" data-nav="missao6">Memória</a>
+      <a href="#missao7" data-nav="missao7">Quiz</a>
+      <a href="jogo-pacotes-v28.html" class="menu-jogo">Jogo</a>
+    </nav>
+  </div>
+  <div class="barra-topo" id="barraTopo"></div>
+</header>
+
+<div class="faixa-marq" aria-hidden="true">
+  <div class="trilha-marq">
+    <span>Voz</span><span>Pacotes</span><span>Conexão</span><span>Reconhecimento</span><span>Telégrafo</span><span>Chamadas online</span><span>Mulheres na ciência</span>
+    <span>Voz</span><span>Pacotes</span><span>Conexão</span><span>Reconhecimento</span><span>Telégrafo</span><span>Chamadas online</span><span>Mulheres na ciência</span>
+  </div>
+</div>
+
+<main>
+
+  <!-- HERO -->
+  <section class="hero" id="inicio">
+    <div>
+      <span class="etiqueta"><svg class="ic" style="width:16px;height:16px"><use href="#i-users"/></svg>Mulheres na Ciência · Feira de Ciências</span>
+      <h1 id="titulo">
+        <span class="palavra" style="--d:.1s">Como</span>
+        <span class="palavra" style="--d:.2s">a</span>
+        <span class="palavra" style="--d:.3s">voz</span>
+        <span class="palavra" style="--d:.4s">passou</span>
+        <span class="palavra" style="--d:.5s">a</span>
+        <span class="palavra" style="--d:.6s">viajar</span>
+        <span class="palavra" style="--d:.7s">pela</span>
+        <em><span class="palavra" style="--d:.8s">internet</span></em><span class="palavra" style="--d:.9s">,</span>
+        <span class="palavra" style="--d:1s">e</span>
+        <span class="palavra" style="--d:1.1s">quem</span>
+        <span class="palavra" style="--d:1.2s">ajudou</span>
+        <span class="palavra" style="--d:1.3s">a</span>
+        <span class="palavra" style="--d:1.4s">torná-la</span>
+        <span class="palavra" style="--d:1.5s">possível</span>
+      </h1>
+      <p class="resumo" data-rv>Um roteiro interativo sobre Marian Croak, engenheira e cientista da computação, e sua contribuição para a comunicação digital. Explore as sete missões em ordem ou escolha a que mais interessar.</p>
+      <div class="botoes" data-rv style="--d:.15s">
+        <a class="btn" href="#missao1">Começar a jornada <svg class="ic"><use href="#i-arrow"/></svg></a>
+        <a class="btn secundario" href="#missao2">Ir direto ao VoIP</a>
+        <a class="btn jogo-btn" href="jogo-pacotes-v28.html"><svg class="ic"><use href="#i-play"/></svg> Jogar Pacotes na Rede</a>
+      </div>
+      <div class="faixa-info">
+        <div class="info spot" data-rv style="--d:.05s"><svg class="ic"><use href="#i-route"/></svg><h4>Acompanhe o caminho</h4><p>Veja como a voz se divide em pacotes.</p></div>
+        <div class="info spot" data-rv style="--d:.15s"><svg class="ic"><use href="#i-clock"/></svg><h4>Compare tempos</h4><p>Carta, telégrafo e internet lado a lado.</p></div>
+        <div class="info spot" data-rv style="--d:.25s"><svg class="ic"><use href="#i-lightbulb"/></svg><h4>Teste o que aprendeu</h4><p>Memória e quiz ao final.</p></div>
+      </div>
+    </div>
+
+    <div class="hero-arte" aria-hidden="true" data-rv>
+      <svg viewBox="0 0 400 400">
+        <defs>
+          <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#7c5ce0" stop-opacity=".55"/>
+            <stop offset="100%" stop-color="#7c5ce0" stop-opacity="0"/>
+          </radialGradient>
+          <linearGradient id="lg" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#a78bfa"/>
+            <stop offset="100%" stop-color="#f4937a"/>
+          </linearGradient>
+          <path id="rotaHero" d="M80 300 C 140 60, 260 340, 320 100"/>
+        </defs>
+        <circle cx="200" cy="200" r="190" fill="url(#glow)"/>
+        <circle class="pulso" cx="200" cy="200" r="120" fill="none" stroke="#a78bfa" stroke-width="1.5"/>
+        <circle class="pulso p2" cx="200" cy="200" r="120" fill="none" stroke="#f4937a" stroke-width="1.5"/>
+        <g class="anel">
+          <circle cx="200" cy="200" r="160" fill="none" stroke="#352b45" stroke-width="1" stroke-dasharray="3 9"/>
+          <circle cx="360" cy="200" r="7" fill="#a78bfa"/>
+          <circle cx="40" cy="200" r="5" fill="#f4937a"/>
+        </g>
+        <g class="anel rev">
+          <circle cx="200" cy="200" r="118" fill="none" stroke="#2e2540" stroke-width="1"/>
+          <circle cx="200" cy="82" r="5" fill="#86dcb9"/>
+        </g>
+        <use href="#rotaHero" fill="none" stroke="#352b45" stroke-width="2" stroke-dasharray="5 7"/>
+        <circle r="7" fill="#a78bfa">
+          <animateMotion dur="4.2s" repeatCount="indefinite" path="M80 300 C 140 60, 260 340, 320 100"/>
+        </circle>
+        <circle r="7" fill="#f4937a">
+          <animateMotion dur="4.2s" begin="-1.4s" repeatCount="indefinite" path="M80 300 C 140 60, 260 340, 320 100"/>
+        </circle>
+        <circle r="7" fill="#86dcb9">
+          <animateMotion dur="4.2s" begin="-2.8s" repeatCount="indefinite" path="M80 300 C 140 60, 260 340, 320 100"/>
+        </circle>
+        <g class="flutua">
+          <path d="M120 200 C 160 150, 240 250, 280 200" fill="none" stroke="url(#lg)" stroke-width="3" stroke-linecap="round"/>
+          <rect x="112" y="152" width="34" height="34" rx="8" fill="#a78bfa"/>
+          <rect x="158" y="232" width="34" height="34" rx="8" fill="#f4937a" opacity=".9"/>
+          <rect x="254" y="164" width="34" height="34" rx="8" fill="#86dcb9" opacity=".9"/>
+          <text x="129" y="174" text-anchor="middle" font-family="Georgia" font-size="16" fill="#0f0c14" font-weight="700">1</text>
+          <text x="175" y="254" text-anchor="middle" font-family="Georgia" font-size="16" fill="#0f0c14" font-weight="700">2</text>
+          <text x="271" y="186" text-anchor="middle" font-family="Georgia" font-size="16" fill="#0f0c14" font-weight="700">3</text>
+        </g>
+        <text x="200" y="352" text-anchor="middle" font-family="Georgia" font-size="15" fill="#b3a8c4" font-style="italic">voz · pacotes · destino</text>
+      </svg>
+    </div>
+  </section>
+
+  <!-- MISSÃO 1 -->
+  <section class="missao" id="missao1">
+    <div class="cab" data-rv>
+      <div class="grande-num">01</div>
+      <div>
+        <p class="chapeu">Missão 1</p>
+        <h2>Quem foi Marian Croak</h2>
+      </div>
+    </div>
+
+    <div class="m1-grid">
+      <figure class="m1-figura spot" id="figura" data-rv>
+        <div class="figWrap" id="figWrap">
+          <div class="balao" id="balao">Toque nos cartões abaixo</div>
+          <svg viewBox="0 0 300 340" class="personagem" aria-hidden="true">
+            <defs>
+              <radialGradient id="halo" cx="50%" cy="45%" r="55%">
+                <stop offset="0" stop-color="#7c5ce0" stop-opacity=".5"/>
+                <stop offset="1" stop-color="#7c5ce0" stop-opacity="0"/>
+              </radialGradient>
+              <linearGradient id="casaco" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#3a2d52"/>
+                <stop offset="1" stop-color="#1d1727"/>
+              </linearGradient>
+            </defs>
+            <circle cx="150" cy="160" r="140" fill="url(#halo)"/>
+            <circle class="anel-p" cx="150" cy="160" r="128" fill="none" stroke="#352b45" stroke-width="1" stroke-dasharray="2 8"/>
+            <g>
+              <text class="bit" x="30" y="120" style="animation-delay:0s">1 0 1</text>
+              <text class="bit" x="236" y="150" style="animation-delay:-2.3s">0 1</text>
+              <text class="bit" x="40" y="236" style="animation-delay:-4.6s">1 1 0</text>
+              <text class="bit" x="240" y="262" style="animation-delay:-1.2s">0 0 1</text>
+            </g>
+            <path d="M48 340 C 54 268, 96 242, 150 242 C 204 242, 246 268, 252 340 Z" fill="url(#casaco)"/>
+            <path d="M122 244 L150 286 L178 244" fill="none" stroke="#f4937a" stroke-width="3" stroke-linejoin="round"/>
+            <rect x="134" y="206" width="32" height="42" rx="12" fill="#6e4330"/>
+            <g class="cabeca">
+              <ellipse cx="150" cy="150" rx="58" ry="66" fill="#7a4d3a"/>
+              <g fill="#1b1320">
+                <circle cx="98" cy="112" r="26"/>
+                <circle cx="128" cy="88" r="28"/>
+                <circle cx="172" cy="88" r="28"/>
+                <circle cx="202" cy="112" r="26"/>
+                <circle cx="150" cy="76" r="30"/>
+              </g>
+              <path d="M90 150 C 84 90, 116 62, 150 62 C 184 62, 216 90, 210 150" fill="none" stroke="#a78bfa" stroke-width="6" stroke-linecap="round"/>
+              <rect x="82" y="140" width="16" height="30" rx="7" fill="#a78bfa"/>
+              <rect x="202" y="140" width="16" height="30" rx="7" fill="#a78bfa"/>
+              <path d="M90 170 C 90 206, 116 210, 137 202" fill="none" stroke="#a78bfa" stroke-width="4" stroke-linecap="round"/>
+              <circle cx="139" cy="202" r="6" fill="#f4937a"/>
+              <circle cx="118" cy="172" r="7" fill="#f4937a" opacity=".35"/>
+              <circle cx="182" cy="172" r="7" fill="#f4937a" opacity=".35"/>
+              <g class="olhos">
+                <ellipse cx="128" cy="150" rx="6" ry="8" fill="#1b1320"/>
+                <ellipse cx="172" cy="150" rx="6" ry="8" fill="#1b1320"/>
+              </g>
+              <path d="M130 178 Q150 194 170 178" fill="none" stroke="#3a1f18" stroke-width="4" stroke-linecap="round"/>
+            </g>
+            <g class="ondas-w" stroke="#86dcb9" fill="none" stroke-width="3" stroke-linecap="round">
+              <path class="w w1" d="M148 202 q12 -14 0 -28"/>
+              <path class="w w2" d="M160 206 q20 -22 0 -44"/>
+              <path class="w w3" d="M172 210 q28 -30 0 -60"/>
+            </g>
+          </svg>
+        </div>
+      </figure>
+
+      <div class="m1-texto">
+        <p class="lead" id="leadM1" style="min-height:7.5em"></p>
+        <p class="corpo" data-rv>Ao longo da carreira, ela registrou mais de 200 patentes relacionadas à comunicação e à tecnologia. Seu trabalho ampliou as formas de contato a distância que hoje sustentam chamadas de voz e reuniões virtuais.</p>
+        <p class="citacao" data-rv>A história da comunicação digital também é a história de quem a projetou.</p>
+      </div>
+    </div>
+
+    <div class="fatos">
+      <div class="fato spot" id="fato1" data-rv style="--d:0s">
+        <span class="marca-fundo">200</span>
+        <span class="icone"><svg class="ic"><use href="#i-scale"/></svg></span>
+        <div class="valor"><span class="numtxt">0</span></div>
+        <p>Patentes registradas relacionadas à comunicação e à tecnologia.</p>
+        <button data-alvo="200" data-sufixo="+" data-fala="Mais de 200 patentes!"><svg class="ic" style="width:14px;height:14px"><use href="#i-play"/></svg>Revelar</button>
+      </div>
+      <div class="fato spot" id="fato2" data-rv style="--d:.12s">
+        <span class="marca-fundo">22</span>
+        <span class="icone"><svg class="ic"><use href="#i-award"/></svg></span>
+        <div class="valor"><span class="numtxt">0</span></div>
+        <p>Ano em que foi incluída no Hall da Fama dos Inventores Nacionais dos Estados Unidos.</p>
+        <button data-alvo="2022" data-sufixo="" data-fala="Hall da Fama, 2022!"><svg class="ic" style="width:14px;height:14px"><use href="#i-play"/></svg>Revelar</button>
+      </div>
+      <div class="fato spot" id="fato3" data-rv style="--d:.24s">
+        <span class="marca-fundo">05</span>
+        <span class="icone"><svg class="ic"><use href="#i-heart"/></svg></span>
+        <div class="valor"><span class="numtxt">0</span></div>
+        <p>Ano do furacão Katrina, quando uma tecnologia de doação por mensagem de texto, desenvolvida com participação dela, foi usada na emergência.</p>
+        <button data-alvo="2005" data-sufixo="" data-fala="Doações por texto em 2005!"><svg class="ic" style="width:14px;height:14px"><use href="#i-play"/></svg>Revelar</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- MISSÃO 2 -->
+  <section class="missao" id="missao2">
+    <div class="cab" data-rv>
+      <div class="grande-num">02</div>
+      <div>
+        <p class="chapeu">Missão 2</p>
+        <h2>Como funciona o VoIP</h2>
+      </div>
+    </div>
+    <p class="lead" data-rv>VoIP significa <em>Voice over Internet Protocol</em>, ou voz sobre protocolo de internet. Acompanhe as quatro etapas do envio de uma chamada.</p>
+
+    <div class="vip-grid">
+      <div>
+        <ol class="etapas" id="etapas">
+          <li class="etapa" data-i="0" data-rv><span class="bola">1</span><div><strong>Captação</strong><span class="txt">O microfone capta a voz como um sinal contínuo de som.</span></div></li>
+          <li class="etapa" data-i="1" data-rv style="--d:.08s"><span class="bola">2</span><div><strong>Digitalização</strong><span class="txt">O sinal é convertido em dados digitais, formados por números.</span></div></li>
+          <li class="etapa" data-i="2" data-rv style="--d:.16s"><span class="bola">3</span><div><strong>Pacotes</strong><span class="txt">Os dados são divididos em pacotes numerados, que podem seguir caminhos diferentes.</span></div></li>
+          <li class="etapa" data-i="3" data-rv style="--d:.24s"><span class="bola">4</span><div><strong>Reconstrução</strong><span class="txt">No destino, os pacotes são reordenados e convertidos de volta em áudio.</span></div></li>
+        </ol>
+        <div class="onda" id="onda" aria-hidden="true">
+          <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+        </div>
+        <button class="btn" id="btnEnviar"><svg class="ic"><use href="#i-mic"/></svg>Enviar uma voz pela internet</button>
+      </div>
+
+      <div data-rv>
+        <div class="painel-rede spot">
+          <svg id="redeSvg" viewBox="0 0 800 260" role="img" aria-label="Pacotes percorrendo caminhos diferentes entre emissor e destinatário">
+            <path id="r1" class="rota" d="M130 130 C 280 30, 520 30, 670 130"/>
+            <path id="r2" class="rota" d="M130 130 C 280 130, 520 130, 670 130"/>
+            <path id="r3" class="rota" d="M130 130 C 280 230, 520 230, 670 130"/>
+            <rect class="no-bloco" x="40" y="95" width="90" height="70" rx="14"/>
+            <text class="no-txt" x="85" y="182">Emissor</text>
+            <rect class="no-bloco" x="670" y="95" width="100" height="70" rx="14"/>
+            <text class="no-txt" x="720" y="182">Destinatário</text>
+            <g id="camada-pacotes"></g>
+          </svg>
+        </div>
+        <div class="chegada" id="chegada"><span class="vazio">Os pacotes aparecerão aqui ao chegar no destino.</span></div>
+        <p class="status" id="status">Pressione o botão para iniciar o envio.</p>
+      </div>
+    </div>
+
+    <div class="experimento" data-rv>
+      <h3>Experimente: envie sua própria frase</h3>
+      <p>Digite uma frase curta. Ela será convertida em números, dividida em pacotes e enviada pela rede acima. No destino, os pacotes são reordenados e a frase é remontada.</p>
+      <div class="entrada">
+        <input id="palavra" type="text" maxlength="24" placeholder="Ex.: Vida, Ciência ou uma frase curta" aria-label="Frase para enviar">
+        <button class="btn" id="btnConverter"><svg class="ic"><use href="#i-mic"/></svg>Enviar pela rede</button>
+      </div>
+      <div class="codigos" id="codigos"></div>
+      <p class="nota-exp" id="notaExp"></p>
+      
+      <div class="reconstruida" id="reconstruida">
+        <span class="rotulo-rec">Mensagem reconstruída no destino</span>
+        <div class="texto-rec" id="textoRec"></div>
+      </div>
+    </div>
+
+    <div class="caixa" data-rv><div class="caixa" data-rv>
+      <p class="rotulo"><svg class="ic" style="width:16px;height:16px;color:var(--menta)"><use href="#i-lightbulb"/></svg> Para lembrar</p>
+      <p>Como os pacotes podem chegar em ordem diferente, o destino precisa do número de sequência para reorganizá-los. Sem isso, a fala sairia embaralhada.</p>
+    </div>
+  </section>
+
+  <!-- MISSÃO 3 -->
+  <section class="missao" id="missao3">
+    <div class="cab" data-rv>
+      <div class="grande-num">03</div>
+      <div>
+        <p class="chapeu">Missão 3</p>
+        <h2>Da carta à chamada online</h2>
+      </div>
+    </div>
+    <p class="lead" data-rv>Cada etapa mostra uma forma de comunicação e o que mudou em relação à anterior. Abra os cartões para ler.</p>
+
+    <div class="tempo-wrap" id="tempo">
+      <div class="tempo-fill" id="tempoFill"></div>
+      <div class="evento" data-rv>
+        <details>
+          <summary><span class="ico"><svg class="ic"><use href="#i-letter"/></svg></span><span><span class="ano">Antiguidade</span><span class="titulo">Cartas</span></span><svg class="ic seta"><use href="#i-chevron"/></svg></summary>
+          <div class="corpo"><b>O que mudou:</b> mensagens eram levadas à mão. A velocidade dependia inteiramente do transporte disponível.</div>
+        </details>
+      </div>
+      <div class="evento" data-rv>
+        <details>
+          <summary><span class="ico"><svg class="ic"><use href="#i-bolt"/></svg></span><span><span class="ano">Século XIX</span><span class="titulo">Telégrafo</span></span><svg class="ic seta"><use href="#i-chevron"/></svg></summary>
+          <div class="corpo"><b>O que mudou:</b> as mensagens passaram a ser enviadas como sinais elétricos por fios. A notícia podia chegar mais rápido que um mensageiro.</div>
+        </details>
+      </div>
+      <div class="evento" data-rv>
+        <details>
+          <summary><span class="ico"><svg class="ic"><use href="#i-phone"/></svg></span><span><span class="ano">1876</span><span class="titulo">Telefone</span></span><svg class="ic seta"><use href="#i-chevron"/></svg></summary>
+          <div class="corpo"><b>O que mudou:</b> a voz passou a ser transmitida em tempo real entre dois aparelhos.</div>
+        </details>
+      </div>
+      <div class="evento destaque" data-rv>
+        <details>
+          <summary><span class="ico"><svg class="ic"><use href="#i-globe"/></svg></span><span><span class="ano">Final do século XX</span><span class="titulo">VoIP</span></span><svg class="ic seta"><use href="#i-chevron"/></svg></summary>
+          <div class="corpo"><b>O que mudou:</b> a voz passou a ser convertida em dados, dividida em pacotes e enviada pela internet. É nessa área que Marian Croak atuou.</div>
+        </details>
+      </div>
+      <div class="evento" data-rv>
+        <details>
+          <summary><span class="ico"><svg class="ic"><use href="#i-pc"/></svg></span><span><span class="ano">Atualidade</span><span class="titulo">Chamadas e reuniões online</span></span><svg class="ic seta"><use href="#i-chevron"/></svg></summary>
+          <div class="corpo"><b>O que mudou:</b> aplicativos como WhatsApp e Zoom usam princípios do VoIP para conectar pessoas em qualquer lugar.</div>
+        </details>
+      </div>
+    </div>
+
+    <div class="curiosidades" data-rv>
+      <h3><svg class="ic"><use href="#i-spark"/></svg>Você sabia?</h3>
+      <div class="carrossel spot">
+        <div class="slides" id="slides">
+          <div class="slide"><span class="n">200+</span><p>Marian Croak registrou mais de 200 patentes relacionadas à comunicação e à tecnologia.</p><small>Trabalho ao longo da carreira</small></div>
+          <div class="slide"><span class="n">1993</span><p>Margaret W. Rossiter descreveu o Efeito Matilda, a tendência de contribuições de mulheres serem ignoradas ou atribuídas a homens.</p><small>Conceito que ajuda a explicar a pouca visibilidade feminina na ciência</small></div>
+          <div class="slide"><span class="n">2010</span><p>Além do Katrina, a tecnologia de doação por mensagem de texto também foi usada após o terremoto no Haiti.</p><small>Exemplo de como a comunicação ajuda em emergências</small></div>
+        </div>
+      </div>
+      <div class="carrossel-nav">
+        <div class="pontos" id="pontos"></div>
+        <div class="setas">
+          <button class="esq" id="antes" aria-label="Anterior"><svg class="ic"><use href="#i-arrow"/></svg></button>
+          <button id="depois" aria-label="Próxima"><svg class="ic"><use href="#i-arrow"/></svg></button>
+        </div>
+      </div>
+    </div>
+    <p class="lead" style="font-size:.85rem;margin-top:1.4rem">As datas da linha do tempo são aproximadas.</p>
+  </section>
+
+  <!-- MISSÃO 4 -->
+  <section class="missao" id="missao4">
+    <div class="cab" data-rv>
+      <div class="grande-num">04</div>
+      <div>
+        <p class="chapeu">Missão 4</p>
+        <h2>Qual meio chega primeiro?</h2>
+      </div>
+    </div>
+    <p class="lead" data-rv>Compare três formas de enviar uma mensagem. A corrida mostra a ordem de chegada na ilustração e não representa tempos medidos.</p>
+
+    <div class="pista" data-rv>
+      <div class="lane">
+        <div class="info-lane"><span class="ic-circ" style="background:rgba(244,147,122,.15);color:var(--coral)"><svg class="ic"><use href="#i-letter"/></svg></span><div>Carta<small>Transporte físico</small></div></div>
+        <div class="trilho"><div class="veiculo" id="vCarta" style="background:var(--coral)"><svg class="ic"><use href="#i-box"/></svg></div><div class="chegada-linha"></div></div>
+      </div>
+      <div class="lane">
+        <div class="info-lane"><span class="ic-circ" style="background:rgba(245,199,107,.15);color:var(--ambar)"><svg class="ic"><use href="#i-bolt"/></svg></span><div>Telégrafo<small>Sinais elétricos</small></div></div>
+        <div class="trilho"><div class="veiculo" id="vTel" style="background:var(--ambar);color:#2a1d05"><svg class="ic"><use href="#i-bolt"/></svg></div><div class="chegada-linha"></div></div>
+      </div>
+      <div class="lane">
+        <div class="info-lane"><span class="ic-circ" style="background:rgba(134,220,185,.15);color:var(--menta)"><svg class="ic"><use href="#i-globe"/></svg></span><div>VoIP<small>Pacotes pela internet</small></div></div>
+        <div class="trilho"><div class="veiculo" id="vVoip" style="background:var(--menta);color:#0d2a1f"><svg class="ic"><use href="#i-globe"/></svg></div><div class="chegada-linha"></div></div>
+      </div>
+    </div>
+    <div class="controles" data-rv>
+      <button class="btn" id="btnCorrida"><svg class="ic"><use href="#i-flag"/></svg>Largar</button>
+      <button class="btn secundario" id="btnReset"><svg class="ic"><use href="#i-refresh"/></svg>Reiniciar</button>
+    </div>
+    <div class="placar-corrida" id="resCorrida"></div>
+
+    <div class="caixa" data-rv>
+      <p class="rotulo"><svg class="ic" style="width:16px;height:16px;color:var(--menta)"><use href="#i-lightbulb"/></svg> Para lembrar</p>
+      <p>A internet não elimina a distância, mas reduz o tempo de espera. Por isso a voz pode chegar ao outro lado quase sem atraso perceptível numa conversa.</p>
+    </div>
+  </section>
+
+  <!-- MISSÃO 5 -->
+  <section class="missao" id="missao5">
+    <div class="cab" data-rv>
+      <div class="grande-num">05</div>
+      <div>
+        <p class="chapeu">Missão 5</p>
+        <h2>Como uma mensagem vira ajuda</h2>
+      </div>
+    </div>
+    <p class="lead" data-rv>Em uma emergência, a mensagem de texto pode ser a forma mais simples de contribuir. Marian Croak participou do desenvolvimento de uma tecnologia de doação por mensagem de texto, usada após o furacão Katrina (2005) e o terremoto no Haiti (2010).</p>
+
+    <div class="em-caixa" data-rv>
+      <p class="rotulo">Como funciona, passo a passo</p>
+      <div class="fluxo-em" id="fluxoEm">
+        <div class="no-f">
+          <span class="ic-no"><svg class="ic"><use href="#i-phone"/></svg></span>
+          <strong>1. Você envia</strong>
+          <small>A mensagem sai do celular de quem doa.</small>
+        </div>
+        <div class="no-f">
+          <span class="ic-no"><svg class="ic"><use href="#i-route"/></svg></span>
+          <strong>2. A rede transporta</strong>
+          <small>A mensagem percorre a rede de telefonia.</small>
+        </div>
+        <div class="no-f">
+          <span class="ic-no"><svg class="ic"><use href="#i-heart"/></svg></span>
+          <strong>3. A central soma</strong>
+          <small>O valor entra no total arrecadado.</small>
+        </div>
+        <span class="bola-em" id="bolaEm"></span>
+      </div>
+      <p class="status" id="statusEm">Escolha um valor abaixo para ver o caminho da mensagem.</p>
+    </div>
+
+    <div class="em-grid" data-rv>
+      <div class="em-painel">
+        <h3>Enviar uma doação</h3>
+        <p class="pequeno">Os valores são pontos simbólicos. A meta desta simulação é de 100 pontos.</p>
+        <div class="doar">
+          <button data-valor="5"><b>5</b>pontos</button>
+          <button data-valor="10"><b>10</b>pontos</button>
+          <button data-valor="25"><b>25</b>pontos</button>
+        </div>
+        <button class="btn secundario" id="btnRecomecar" style="margin-top:1.2rem"><svg class="ic"><use href="#i-refresh"/></svg>Recomeçar</button>
+      </div>
+
+      <div class="em-painel">
+        <div class="contador"><span id="valorEm">0</span><small>de 100 pontos</small></div>
+        <div class="barra-meta"><div id="preenchEm"></div></div>
+        <p class="pequeno" id="faltamEm">Faltam 100 pontos para a meta.</p>
+        <h4>Mensagens recebidas</h4>
+        <ol class="log-lista" id="logEm"><li class="vazio">Nenhuma mensagem ainda.</li></ol>
+        <p class="aviso-meta" id="avisoEm"></p>
+      </div>
+    </div>
+
+    <div class="caixa" data-rv>
+      <p class="rotulo"><svg class="ic" style="width:16px;height:16px;color:var(--menta)"><use href="#i-lightbulb"/></svg> Para lembrar</p>
+      <p>A tecnologia não substitui o socorro. Ela permite que muitas pessoas contribuam de onde estiverem, usando apenas o celular, e que o total arrecadado seja acompanhado com rapidez.</p>
+    </div>
+    <p class="pequeno" style="margin-top:1rem">Simulação didática. Não representa valores reais de nenhuma campanha.</p>
+  </section>
+
+  <!-- MISSÃO 6 -->
+  <section class="missao" id="missao6">
+    <div class="cab" data-rv>
+      <div class="grande-num">06</div>
+      <div>
+        <p class="chapeu">Missão 6</p>
+        <h2>Associe os conceitos</h2>
+      </div>
+    </div>
+    <p class="lead" data-rv>Encontre os pares: cada conceito com a sua descrição. Vire duas cartas por vez.</p>
+    <div class="grade" id="grade"></div>
+    <p class="memo-legenda" id="legMem"></p>
+    <div class="memo-acoes">
+      <button class="btn secundario" id="btnEmbaralhar"><svg class="ic"><use href="#i-shuffle"/></svg>Embaralhar</button>
+      <span class="jogadas" id="jogadas"></span>
+    </div>
+  </section>
+
+  <!-- MISSÃO 7 -->
+  <section class="missao" id="missao7">
+    <div class="cab" data-rv>
+      <div class="grande-num">07</div>
+      <div>
+        <p class="chapeu">Missão 7</p>
+        <h2>Verificação final</h2>
+      </div>
+    </div>
+    <div class="quiz-wrap">
+      <div class="quiz-card spot" id="quiz" data-rv></div>
+      <aside class="placar-lado" id="lado" data-rv style="--d:.1s">
+        <svg viewBox="0 0 160 160" aria-hidden="true">
+          <circle cx="80" cy="80" r="66" fill="none" stroke="#352b45" stroke-width="12"/>
+          <circle id="anelQuiz" cx="80" cy="80" r="66" fill="none" stroke="#86dcb9" stroke-width="12" stroke-linecap="round"
+            stroke-dasharray="414.7" stroke-dashoffset="414.7" transform="rotate(-90 80 80)" style="transition:stroke-dashoffset .8s cubic-bezier(.3,1.2,.4,1)"/>
+        </svg>
+        <div class="num" id="pontoQuiz">0/5</div>
+        <p>Acertos</p>
+      </aside>
+    </div>
+  </section>
+
+</main>
+
+<div class="rodape">IF Baiano · Campus Santa Inês · Curso Técnico em Informática · Projeto Ciência Delas · Novembro de 2026</div>
+
+<script>
+const $ = (s, el = document) => el.querySelector(s);
+const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+const shuffle = a => { a = [...a]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const NS = 'http://www.w3.org/2000/svg';
+const reduzMovimento = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ===== título: entrada das palavras ===== */
+$$('#titulo .palavra').forEach(p => p.style.animationPlayState = 'running');
+
+/* ===== revelar ao rolar (com escalonamento entre irmãos) ===== */
+const obsRv = new IntersectionObserver(entradas => {
+  entradas.forEach(en => {
+    if (en.isIntersecting) {
+      en.target.classList.add('on');
+      if (en.target.classList.contains('missao') || en.target.closest('.missao')) {}
+      obsRv.unobserve(en.target);
+    }
+  });
+}, { threshold: .12 });
+$$('[data-rv]').forEach(el => obsRv.observe(el));
+
+const obsMissao = new IntersectionObserver(entradas => {
+  entradas.forEach(en => { if (en.isIntersecting) en.target.classList.add('on'); });
+}, { threshold: .05 });
+$$('section.missao').forEach(s => obsMissao.observe(s));
+
+/* ===== navegação ativa e barra de leitura ===== */
+const obsNav = new IntersectionObserver(es => es.forEach(e => {
+  if (e.isIntersecting) $$('.menu a').forEach(a => a.classList.toggle('ativo', a.dataset.nav === e.target.id));
+}), { rootMargin: '-45% 0px -50% 0px' });
+$$('section.missao').forEach(s => obsNav.observe(s));
+
+const barraTopo = $('#barraTopo');
+addEventListener('scroll', () => {
+  const max = document.documentElement.scrollHeight - innerHeight;
+  barraTopo.style.width = (scrollY / max * 100) + '%';
+  /* preenchimento da linha do tempo acompanha a rolagem */
+  const tempo = $('#tempo'), fill = $('#tempoFill');
+  const r = tempo.getBoundingClientRect();
+  const alvo = innerHeight * .6;
+  const prog = Math.min(1, Math.max(0, (alvo - r.top) / r.height));
+  fill.style.height = (prog * (r.height - 12)) + 'px';
+  $$('#tempo .evento').forEach((ev, i) => {
+    const er = ev.getBoundingClientRect();
+    ev.classList.toggle('aceso', er.top < innerHeight * .65);
+  });
+}, { passive: true });
+
+/* ===== efeito de luz do cursor ===== */
+document.addEventListener('mousemove', e => {
+  const t = e.target.closest('.spot');
+  if (!t) return;
+  const r = t.getBoundingClientRect();
+  t.style.setProperty('--sx', (e.clientX - r.left) + 'px');
+  t.style.setProperty('--sy', (e.clientY - r.top) + 'px');
+});
+
+/* ===== missão 1: personagem e fatos ===== */
+const textoLead = 'Engenheira e cientista da computação norte-americana, reconhecida pelo trabalho no desenvolvimento do VoIP, a tecnologia que transforma a voz em dados e a envia pela internet.';
+const leadM1 = $('#leadM1');
+let digitouM1 = false;
+const obsDigitar = new IntersectionObserver(es => es.forEach(e => {
+  if (!e.isIntersecting || digitouM1) return;
+  digitouM1 = true;
+  if (reduzMovimento) { leadM1.textContent = textoLead; return; }
+  let i = 0;
+  const t = setInterval(() => {
+    leadM1.textContent = textoLead.slice(0, ++i);
+    if (i >= textoLead.length) clearInterval(t);
+  }, 22);
+}), { threshold: .4 });
+obsDigitar.observe(leadM1);
+
+const balao = $('#balao');
+const falas = ['Mais de 200 patentes', 'Hall da Fama, 2022', 'Doações por texto, 2005', 'Voz em pacotes pela internet'];
+let falaIdx = 0, falaManual = false, falaTimeout;
+function falar(txt, duracao) {
+  balao.textContent = txt;
+  balao.classList.remove('troca'); void balao.offsetWidth; balao.classList.add('troca');
+  if (duracao) {
+    falaManual = true;
+    clearTimeout(falaTimeout);
+    falaTimeout = setTimeout(() => { falaManual = false; }, duracao);
+  }
+}
+if (!reduzMovimento) {
+  setInterval(() => {
+    if (falaManual) return;
+    falaIdx = (falaIdx + 1) % falas.length;
+    falar(falas[falaIdx]);
+  }, 3200);
+}
+
+const figura = $('#figura'), figWrap = $('#figWrap');
+figura.addEventListener('mousemove', e => {
+  if (reduzMovimento) return;
+  const r = figura.getBoundingClientRect();
+  const x = (e.clientX - r.left) / r.width - .5;
+  const y = (e.clientY - r.top) / r.height - .5;
+  figWrap.style.transform = `rotateY(${x * 16}deg) rotateX(${-y * 12}deg)`;
+});
+figura.addEventListener('mouseleave', () => { figWrap.style.transform = ''; });
+figura.addEventListener('click', () => {
+  figura.classList.add('falar');
+  setTimeout(() => figura.classList.remove('falar'), 2400);
+  falar('Toque nos cartões abaixo!', 2600);
+});
+
+$$('.fato button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const card = btn.closest('.fato');
+    const alvo = +btn.dataset.alvo, suf = btn.dataset.sufixo;
+    const el = $('.numtxt', card), valor = $('.valor', card);
+    card.classList.add('revelado');
+    falar(btn.dataset.fala, 3200);
+    const dur = reduzMovimento ? 1 : 1100, ini = performance.now();
+    (function passo(t) {
+      const p = Math.min(1, (t - ini) / dur);
+      el.textContent = p === 1 ? alvo + suf : Math.round(alvo * (1 - Math.pow(1 - p, 3)));
+      if (p < 1) requestAnimationFrame(passo);
+      else { valor.classList.add('bum'); }
+    })(ini);
+  });
+});
+
+/* ===== missão 2 e experimento: envio pela rede (mesma animação) ===== */
+const rotas = [$('#r1'), $('#r2'), $('#r3')];
+const camada = $('#camada-pacotes');
+const onda = $('#onda');
+const etapasEl = $$('.etapa');
+const chegadaEl = $('#chegada');
+const statusEl = $('#status');
+let enviando = false, runEnvio = 0;
+
+function ativarEtapa(i) {
+  etapasEl.forEach((e, j) => {
+    e.classList.toggle('ativa', j === i);
+    e.classList.toggle('feita', j < i);
+  });
+}
+function pintarRota(i) { rotas.forEach((r, j) => r.classList.toggle('ativa', j === i)); }
+
+function enviarPacotes(cfg) {
+  const id = ++runEnvio;
+  enviando = true;
+  camada.innerHTML = '';
+  chegadaEl.innerHTML = '';
+  pintarRota(-1);
+  etapasEl.forEach(e => e.classList.remove('ativa', 'feita'));
+  onda.classList.remove('on');
+
+  const N = cfg.itens.length;
+  const chegaram = [];
+  statusEl.textContent = cfg.passos[0];
+  ativarEtapa(0);
+  onda.classList.add('on');
+  setTimeout(() => {
+    if (id !== runEnvio) return;
+    onda.classList.remove('on');
+    ativarEtapa(1);
+    statusEl.textContent = cfg.passos[1];
+  }, 1600);
+  setTimeout(() => {
+    if (id !== runEnvio) return;
+    ativarEtapa(2);
+    statusEl.textContent = cfg.passos[2];
+    pintarRota(-1);
+  }, 3000);
+
+  const inicioEnvio = performance.now() + 3400;
+  const pacotes = cfg.itens.map((it, idx) => {
+    const rota = Math.floor(Math.random() * 3);
+    const g = document.createElementNS(NS, 'g');
+    g.setAttribute('class', 'pacote' + (rota === 1 ? ' atraso' : ''));
+    const rect = document.createElementNS(NS, 'rect');
+    rect.setAttribute('width', 30); rect.setAttribute('height', 30); rect.setAttribute('rx', 7);
+    const txt = document.createElementNS(NS, 'text');
+    txt.setAttribute('x', 15); txt.setAttribute('y', 16);
+    txt.textContent = it.seq;
+    g.appendChild(rect); g.appendChild(txt);
+    camada.appendChild(g);
+    return {
+      g, rota, it, path: rotas[rota], len: rotas[rota].getTotalLength(),
+      inicio: inicioEnvio + (idx + 1) * 220 + Math.random() * 300,
+      dur: 1600 + Math.random() * 900, feito: false
+    };
+  });
+
+  function chegou(p) {
+    const ordem = chegaram.length;
+    const chip = document.createElement('span');
+    chip.className = 'chip' + (ordem !== p.it.seq - 1 ? ' fora' : '');
+    chip.dataset.seq = p.it.seq;
+    chip.textContent = p.it.detalhe;
+    chegadaEl.appendChild(chip);
+    chegaram.push(p);
+    if (chegaram.length === N) finalizar();
+  }
+
+  function quadro(t) {
+    if (id !== runEnvio) return;
+    let ativo = false;
+    pacotes.forEach(p => {
+      if (p.feito) return;
+      ativo = true;
+      if (t < p.inicio) { p.g.setAttribute('transform', 'translate(-100,-100)'); return; }
+      const k = Math.min(1, (t - p.inicio) / p.dur);
+      const pt = p.path.getPointAtLength(k * p.len);
+      p.g.setAttribute('transform', `translate(${pt.x - 15},${pt.y - 15})`);
+      if (k > .02 && k < 1) rotas.forEach((r, j) => r.classList.toggle('ativa', j === p.rota));
+      if (k >= 1) { p.feito = true; p.g.remove(); chegou(p); }
+    });
+    if (ativo) requestAnimationFrame(quadro);
+  }
+
+  function finalizar() {
+    ativarEtapa(3);
+    statusEl.textContent = cfg.passos[3];
+    setTimeout(() => {
+      if (id !== runEnvio) return;
+      $$('.chip', chegadaEl).forEach(ch => {
+        ch.style.order = ch.dataset.seq;
+        ch.classList.remove('fora');
+        ch.classList.add('ok');
+      });
+      etapasEl.forEach(e => { e.classList.remove('ativa'); e.classList.add('feita'); });
+      pintarRota(-1);
+      enviando = false;
+      if (cfg.aoFim) cfg.aoFim();
+    }, 1000);
+  }
+
+  requestAnimationFrame(quadro);
+}
+
+$('#btnEnviar').addEventListener('click', () => {
+  if (enviando) return;
+  enviarPacotes({
+    itens: [1, 2, 3, 4, 5, 6].map(n => ({ seq: n, detalhe: 'Pacote ' + n })),
+    passos: [
+      'Etapa 1: a voz é captada pelo microfone.',
+      'Etapa 2: o sinal é convertido em números.',
+      'Etapa 3: os dados são divididos em pacotes numerados.',
+      'Etapa 4: os pacotes chegaram fora de ordem. O destino os reordena pelo número.'
+    ],
+    aoFim: () => { statusEl.textContent = 'Pronto: a mensagem foi reconstruída e reproduzida.'; }
+  });
+});
+
+/* experimento: a frase usa a mesma animação de envio */
+const recEl = $('#reconstruida'), textoRec = $('#textoRec'), notaExp = $('#notaExp');
+$('#btnConverter').addEventListener('click', () => {
+  const frase = $('#palavra').value;
+  if (!frase.trim()) { notaExp.textContent = 'Digite uma frase para enviar.'; return; }
+  if (enviando) return;
+  const chars = [...frase];
+  const codigos = chars.map(c => c.charCodeAt(0));
+  $('#codigos').innerHTML = chars.map((c, i) =>
+    `<span style="--d:${i * .04}s">${c === ' ' ? 'espaço' : c} → ${codigos[i]}</span>`).join('');
+  const grupos = [];
+  for (let i = 0; i < codigos.length; i += 3) {
+    grupos.push({ seq: grupos.length + 1, codigos: codigos.slice(i, i + 3) });
+  }
+  recEl.classList.remove('mostrar');
+  textoRec.innerHTML = '';
+  notaExp.textContent = `Cada caractere virou um número, e os números formam ${grupos.length} pacote(s). Acompanhe o envio no diagrama acima.`;
+  enviarPacotes({
+    itens: grupos.map(g => ({ seq: g.seq, detalhe: `Pacote ${g.seq}: ${g.codigos.join(' · ')}` })),
+    passos: [
+      'Etapa 1: a frase é convertida em números, caractere por caractere.',
+      'Etapa 2: os números são agrupados em pacotes numerados.',
+      'Etapa 3: os pacotes percorrem a rede por caminhos diferentes.',
+      'Etapa 4: os pacotes chegaram fora de ordem. O destino os reordena pelo número.'
+    ],
+    aoFim: () => remontar(grupos)
+  });
+});
+
+function remontar(grupos) {
+  statusEl.textContent = 'Passo final: o destino remonta a frase com as letras de cada pacote.';
+  recEl.classList.add('mostrar');
+  const codigos = grupos.flatMap(g => g.codigos);
+  let i = 0;
+  const t = setInterval(() => {
+    const sp = document.createElement('span');
+    const ch = String.fromCharCode(codigos[i]);
+    sp.textContent = ch === ' ' ? '\u00A0' : ch;
+    textoRec.appendChild(sp);
+    i++;
+    if (i >= codigos.length) {
+      clearInterval(t);
+      const frase = textoRec.textContent.replace(/\u00A0/g, ' ');
+      notaExp.textContent = `Frase reconstruída com sucesso: "${frase}".`;
+      statusEl.textContent = 'Pronto: a frase foi reconstruída no destino.';
+    }
+  }, 180);
+}
+
+/* ===== missão 3: carrossel ===== */
+const slides = $('#slides');
+const totalSlides = slides.children.length;
+let atualSlide = 0, timerSlide;
+const pontosEl = $('#pontos');
+for (let i = 0; i < totalSlides; i++) {
+  const b = document.createElement('button');
+  b.setAttribute('aria-label', 'Curiosidade ' + (i + 1));
+  b.addEventListener('click', () => irSlide(i, true));
+  pontosEl.appendChild(b);
+}
+function irSlide(i, manual) {
+  atualSlide = (i + totalSlides) % totalSlides;
+  slides.style.transform = `translateX(-${atualSlide * 100}%)`;
+  $$('button', pontosEl).forEach((b, j) => b.classList.toggle('ativo', j === atualSlide));
+  if (manual) reiniciarTimer();
+}
+function reiniciarTimer() {
+  clearInterval(timerSlide);
+  if (!reduzMovimento) timerSlide = setInterval(() => irSlide(atualSlide + 1), 6000);
+}
+$('#depois').addEventListener('click', () => irSlide(atualSlide + 1, true));
+$('#antes').addEventListener('click', () => irSlide(atualSlide - 1, true));
+irSlide(0); reiniciarTimer();
+
+/* ===== missão 4: corrida ===== */
+const duracoes = { vCarta: 8, vTel: 4, vVoip: 1.6 };
+let correndo = false;
+$('#btnCorrida').addEventListener('click', () => {
+  if (correndo) return;
+  correndo = true;
+  $('#resCorrida').textContent = 'Em andamento...';
+  for (const id in duracoes) {
+    const el = document.getElementById(id);
+    const largura = el.parentElement.clientWidth - 60;
+    el.classList.add('pulsa');
+    el.style.transition = `transform ${duracoes[id]}s cubic-bezier(.4,0,.6,1)`;
+    requestAnimationFrame(() => el.style.transform = `translateX(${largura}px)`);
+  }
+  setTimeout(() => {
+    $$('.veiculo').forEach(v => v.classList.remove('pulsa'));
+    $('#resCorrida').innerHTML = '<div class="podio"><span style="--d:0s"><b>1º</b> VoIP</span><span style="--d:.15s"><b>2º</b> Telégrafo</span><span style="--d:.3s"><b>3º</b> Carta</span></div><p class="sobre-tempo">Ordem de chegada na ilustração. Os tempos são didáticos.</p>';
+    correndo = false;
+  }, 8300);
+});
+$('#btnReset').addEventListener('click', () => {
+  for (const id in duracoes) {
+    const el = document.getElementById(id);
+    el.classList.remove('pulsa');
+    el.style.transition = 'none';
+    el.style.transform = 'translateX(0)';
+  }
+  $('#resCorrida').textContent = '';
+});
+
+/* ===== missão 5: como uma mensagem vira ajuda ===== */
+const fluxoEm = $('#fluxoEm'), bolaEm = $('#bolaEm'), nosEm = $$('.no-f', fluxoEm);
+const statusEm = $('#statusEm');
+const META_EM = 100;
+let arrecadado = 0, contMsg = 0, enviandoEm = false;
+function centroEm(el) {
+  const r = el.getBoundingClientRect(), f = fluxoEm.getBoundingClientRect();
+  return r.left - f.left + r.width / 2;
+}
+function moverBola(a, b, dur) {
+  return bolaEm.animate(
+    [{ transform: `translate(${a}px,-50%)` }, { transform: `translate(${b}px,-50%)` }],
+    { duration: reduzMovimento ? 1 : dur, easing: 'ease-in-out', fill: 'forwards' });
+}
+function atualizarEm() {
+  $('#valorEm').textContent = arrecadado;
+  $('#preenchEm').style.width = (arrecadado / META_EM * 100) + '%';
+  const falta = META_EM - arrecadado;
+  $('#faltamEm').textContent = falta > 0 ? `Faltam ${falta} pontos para a meta.` : 'Meta alcançada.';
+}
+function somar(v) {
+  arrecadado = Math.min(META_EM, arrecadado + v);
+  contMsg++;
+  const log = $('#logEm');
+  if (log.querySelector('.vazio')) log.innerHTML = '';
+  const li = document.createElement('li');
+  li.innerHTML = `<span>Mensagem ${contMsg}</span><b>+${v} pontos</b>`;
+  log.prepend(li);
+  atualizarEm();
+  if (arrecadado >= META_EM) {
+    $('#avisoEm').textContent = 'Meta atingida. A soma das mensagens formou o total da campanha.';
+    $$('.doar button').forEach(b => b.disabled = true);
+  }
+}
+$$('.doar button').forEach(btn => btn.addEventListener('click', () => {
+  if (enviandoEm || arrecadado >= META_EM) return;
+  enviandoEm = true;
+  const v = +btn.dataset.valor;
+  nosEm.forEach(n => n.classList.remove('ativo'));
+  bolaEm.getAnimations().forEach(a => a.cancel());
+  bolaEm.style.opacity = 1;
+  const xs = nosEm.map(centroEm);
+  nosEm[0].classList.add('ativo');
+  statusEm.textContent = `Passo 1: uma mensagem de ${v} pontos sai do celular.`;
+  moverBola(xs[0], xs[1], 1100).onfinish = () => {
+    nosEm[1].classList.add('ativo');
+    statusEm.textContent = 'Passo 2: a mensagem percorre a rede de telefonia.';
+    moverBola(xs[1], xs[2], 1100).onfinish = () => {
+      nosEm[2].classList.add('ativo');
+      statusEm.textContent = 'Passo 3: a central soma o valor ao total arrecadado.';
+      bolaEm.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 300, fill: 'forwards' });
+      somar(v);
+      enviandoEm = false;
+    };
+  };
+}));
+$('#btnRecomecar').addEventListener('click', () => {
+  arrecadado = 0; contMsg = 0; enviandoEm = false;
+  bolaEm.getAnimations().forEach(a => a.cancel());
+  bolaEm.style.opacity = 0;
+  nosEm.forEach(n => n.classList.remove('ativo'));
+  $('#logEm').innerHTML = '<li class="vazio">Nenhuma mensagem ainda.</li>';
+  $('#avisoEm').textContent = '';
+  $$('.doar button').forEach(b => b.disabled = false);
+  statusEm.textContent = 'Escolha um valor para ver o caminho da mensagem.';
+  atualizarEm();
+});
+atualizarEm();
+
+/* ===== missão 6: memória ===== */
+const pares = [
+  ['VoIP', 'Voz transmitida pela internet em pacotes'],
+  ['Efeito Matilda', 'Contribuições de mulheres ignoradas ou atribuídas a homens (Rossiter, 1993)'],
+  ['Hall da Fama (2022)', 'Reconhecimento de Marian Croak como inventora'],
+  ['Katrina (2005)', 'Emergência em que a doação por mensagem de texto foi usada']
+];
+let abertas = [], bloqueado = false, acertos = 0, jogadas = 0;
+function montarMemoria() {
+  const grade = $('#grade');
+  grade.innerHTML = ''; abertas = []; bloqueado = false; acertos = 0; jogadas = 0;
+  $('#legMem').textContent = ''; $('#jogadas').textContent = 'Jogadas: 0';
+  const itens = shuffle(pares.flatMap((p, i) => [{ t: p[0], id: i }, { t: p[1], id: i }]));
+  itens.forEach((it, idx) => {
+    const c = document.createElement('div');
+    c.className = 'carta'; c.dataset.id = it.id; c.tabIndex = 0; c.setAttribute('role', 'button');
+    c.style.animation = `surgir .5s both`; c.style.animationDelay = (idx * .05) + 's';
+    c.innerHTML = `<div class="in"><div class="f">?</div><div class="v">${it.t}</div></div>`;
+    const virar = () => {
+      if (bloqueado || c.classList.contains('virada') || c.classList.contains('certa')) return;
+      c.classList.add('virada'); abertas.push(c);
+      if (abertas.length === 2) {
+        bloqueado = true; jogadas++; $('#jogadas').textContent = `Jogadas: ${jogadas}`;
+        const [a, b] = abertas;
+        if (a.dataset.id === b.dataset.id) {
+          setTimeout(() => {
+            a.classList.add('certa'); b.classList.add('certa');
+            acertos++; abertas = []; bloqueado = false;
+            if (acertos === pares.length) $('#legMem').textContent = `Todos os pares encontrados em ${jogadas} jogadas.`;
+          }, 450);
+        } else {
+          a.classList.add('errada'); b.classList.add('errada');
+          setTimeout(() => {
+            [a, b].forEach(x => x.classList.remove('virada', 'errada'));
+            abertas = []; bloqueado = false;
+          }, 1000);
+        }
+      }
+    };
+    c.addEventListener('click', virar);
+    c.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); virar(); } });
+    grade.appendChild(c);
+  });
+}
+$('#btnEmbaralhar').addEventListener('click', montarMemoria);
+montarMemoria();
+
+/* ===== missão 7: quiz ===== */
+const perguntas = [
+  { p: 'Qual tecnologia permite fazer chamadas de voz pela internet?',
+    o: ['Telégrafo', 'VoIP', 'Carta', 'Telefone fixo'], c: 1,
+    e: 'O VoIP converte a voz em dados e os envia pela internet, em pacotes.' },
+  { p: 'Em que ano Marian Croak foi incluída no Hall da Fama dos Inventores Nacionais dos Estados Unidos?',
+    o: ['2005', '2010', '2022', '1993'], c: 2,
+    e: 'A inclusão ocorreu em 2022, em reconhecimento às contribuições para a inovação tecnológica.' },
+  { p: 'Quem descreveu o Efeito Matilda em 1993?',
+    o: ['Marian Croak', 'Margaret W. Rossiter', 'Alexander Graham Bell', 'Samuel Morse'], c: 1,
+    e: 'Margaret W. Rossiter descreveu a tendência de contribuições científicas de mulheres serem ignoradas ou atribuídas a colegas homens.' },
+  { p: 'Qual tecnologia foi usada após o furacão Katrina (2005) e o terremoto no Haiti (2010)?',
+    o: ['Doação por mensagem de texto', 'Telégrafo', 'Carta registrada', 'Rádio AM'], c: 0,
+    e: 'Marian Croak participou do desenvolvimento dessa tecnologia de doação por mensagem de texto.' },
+  { p: 'No VoIP, o que acontece com os pacotes ao chegar ao destino?',
+    o: ['São descartados', 'São reordenados e convertidos de volta em áudio', 'São gravados em fita', 'São transformados em texto'], c: 1,
+    e: 'Os números de sequência permitem reordenar os pacotes antes da reprodução.' }
+];
+const letras = ['A', 'B', 'C', 'D'];
+const CIRC_Q = 414.7;
+let qAtual = 0, acertosQuiz = 0;
+function atualizarLado() {
+  $('#pontoQuiz').textContent = `${acertosQuiz}/${perguntas.length}`;
+  $('#anelQuiz').style.strokeDashoffset = CIRC_Q * (1 - acertosQuiz / perguntas.length);
+}
+function renderQuiz() {
+  const box = $('#quiz');
+  atualizarLado();
+  if (qAtual >= perguntas.length) return finalQuiz();
+  const q = perguntas[qAtual];
+  const prog = perguntas.map((_, i) => `<span class="${i < qAtual ? 'feita' : i === qAtual ? 'atual' : ''}"></span>`).join('');
+  box.innerHTML = `
+    <div class="quiz-prog">${prog}</div>
+    <p class="pergunta">${q.p}</p>
+    <div class="opcoes"></div>
+    <div class="feedback" id="fb"></div>
+    <div class="quiz-acoes" id="areaProx"><button class="btn" id="prox">Próxima <svg class="ic"><use href="#i-arrow"/></svg></button></div>`;
+  const ops = $('.opcoes', box);
+  q.o.forEach((t, i) => {
+    const b = document.createElement('button');
+    b.className = 'opcao';
+    b.style.setProperty('--d', (i * .07) + 's');
+    b.innerHTML = `<span class="letra">${letras[i]}</span><span>${t}</span>`;
+    b.addEventListener('click', () => {
+      $$('.opcao', ops).forEach(x => x.disabled = true);
+      $$('.opcao', ops)[q.c].classList.add('certa');
+      if (i === q.c) acertosQuiz++; else b.classList.add('errada');
+      const fb = $('#fb');
+      fb.innerHTML = `<strong>${i === q.c ? 'Resposta correta.' : 'Resposta incorreta.'}</strong> ${q.e}`;
+      fb.classList.add('mostrar');
+      $('#areaProx').classList.add('mostrar');
+      atualizarLado();
+    });
+    ops.appendChild(b);
+  });
+  $('#prox').addEventListener('click', () => { qAtual++; renderQuiz(); });
+}
+function finalQuiz() {
+  const nota = acertosQuiz / perguntas.length;
+  const texto = nota === 1 ? 'Todas as respostas corretas. Ótimo acompanhamento do roteiro.'
+    : nota >= .6 ? 'Bom resultado. Releia as seções em que errou.'
+    : 'Vale revisar o roteiro e tentar de novo.';
+  $('#quiz').innerHTML = `
+    <div class="fim-quiz">
+      <p class="rotulo">Resultado</p>
+      <h3 style="font-family:var(--serif);font-weight:normal;font-size:1.8rem;margin:.4rem 0 .6rem">${acertosQuiz} de ${perguntas.length} corretas</h3>
+      <div class="final-msg"><strong>${nota >= .6 ? 'Muito bem' : 'Quase lá'}</strong>${texto}</div>
+      <button class="btn secundario" id="reiniciar" style="margin-top:1.4rem"><svg class="ic"><use href="#i-refresh"/></svg>Refazer o quiz</button>
+    </div>`;
+  $('#reiniciar').addEventListener('click', () => { qAtual = 0; acertosQuiz = 0; renderQuiz(); });
+}
+renderQuiz();
+</script>
+</body>
+</html>
